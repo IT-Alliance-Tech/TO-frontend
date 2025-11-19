@@ -967,7 +967,7 @@ const handlePostPropertySubmit = async () => {
                   variant="subtitle2"
                   color="primary"
                   fontWeight={600}
-                  gutterBottom
+                        gutterBottom
                 >
                          Search Filters
                 </Typography>
