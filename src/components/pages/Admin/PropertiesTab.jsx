@@ -969,7 +969,7 @@ const handlePostPropertySubmit = async () => {
                   fontWeight={600}
                   gutterBottom
                 >
-                  Search Filters
+                         Search Filters
                 </Typography>
               </Grid>
 
