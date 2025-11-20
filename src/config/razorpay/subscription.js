@@ -23,10 +23,10 @@ export const createSubscription = async (planId, userId) => {
 // 2. GET ACTIVE SUBSCRIPTION FOR USER
 // Endpoint → GET /user-subscriptions/active/:userId
 // ---------------------------------------------------
-export const getUserSubscription = async (userId) => {
+export const getUserSubscription = async () => {
   try {
     const response = await axios.get(
-      `${buildApiUrl(API_CONFIG.SUBSCRIPTION.ACTIVE_FOR_USER)}${userId}`
+      `${buildApiUrl(API_CONFIG.SUBSCRIPTION.BASE)}`
     );
     return response.data;
   } catch (error) {

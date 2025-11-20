@@ -1,6 +1,6 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'https://tru-backend-6v7c.onrender.com/api',
+  BASE_URL: 'https://backend-to-1.onrender.com/api',
   
   // Auth endpoints
   AUTH: {
@@ -42,14 +42,10 @@ export const API_CONFIG = {
     BOOKING_UPDATE: '/booking/:id/update-time',
   },
 
-
+  // ✅ Only these two subscription APIs are used now
   SUBSCRIPTION: {
-    BASE: '/subscriptions',                           // localhost:5000/api/subscriptions
-    CREATE_FOR_USER: '/user-subscriptions/subscribe', // POST create subscription
-    ALL_SUBSCRIPTIONS: '/user-subscriptions',         // GET all subscriptions
-    ACTIVE_FOR_USER: '/user-subscriptions/active/',   // GET active subscription by user → /active/:user_id
-    UPGRADE: '/user-subscriptions/',                  // PUT upgrade → /:userSubscriptionId/upgrade
-    GET_BY_ID: '/user-subscriptions/',                // GET → /user-subscriptions/<userSubscriptionId>
+    BASE: '/subscriptions',                    // localhost:5000/api/subscriptions
+    CREATE_FOR_USER: '/user-subscriptions/subscribe' // local/api/user-subscriptions/subscribe
   }
 }
 
