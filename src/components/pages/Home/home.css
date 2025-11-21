@@ -734,7 +734,7 @@
 }
 @media(max-width:800px){
     .sec-top {
-    margin-top: -350px !important;
+    margin-top: 100px !important;
   }
   .search-filter-container {
     margin-top: 200px;
@@ -743,7 +743,7 @@
 }
 @media(max-width:600px) {
   .sec-top {
-    margin-top: -500px !important;
+    margin-top: 100px !important;
   }
    .search-filter-container {
     margin-top: 500px;

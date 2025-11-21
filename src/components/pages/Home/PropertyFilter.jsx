@@ -45,22 +45,6 @@ const defaultFilters = {
 
 // ======== Styled Components ========
 const StyledTabs = styled(Tabs)(({ theme }) => ({
-  "& .MuiTabs-flexContainer": {
-    display: "flex",
-    justifyContent: "center",
-    // flexWrap: "wrap",  
-    [theme.breakpoints.down(568)]: {
-      flexDirection: "column",
-      alignItems: "center",
-    },
-    [theme.breakpoints.down(992)]: {
-     display: "grid",
-     gridTemplateColumns: "1fr 1fr",
-     gap: "8px",
-     justifyContent: "center",
-     alignItems: "center",
-    },
-  },
   "& .MuiTabs-indicator": {
     display: "none",
   },
@@ -78,9 +62,6 @@ const StyledTab = styled(Tab)(({ theme }) => ({
     backgroundColor: "#1976d2",
     color: "white",
     fontWeight: "800",
-  },
-  "@media (max-width:568px)": {
-    minWidth: "250px",
   },
 }));
 
@@ -128,7 +109,6 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
     ...initialFilters,
   }));
 
-  // Map status to tab index
   const getStatusTabIndex = (status) => {
     switch (status) {
       case "rent":
@@ -201,8 +181,15 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
 
   return (
     <div>
-      {/* Status Tabs */}
-      <StyledTabs value={statusTab} onChange={handleTabChange} centered>
+      {/* Status Tabs - Show above 992px only */}
+      <StyledTabs
+        value={statusTab}
+        onChange={handleTabChange}
+        centered
+        sx={{
+          display: { xs: "none", sm: "none", md: "none", lg: "flex" },
+        }}
+      >
         <StyledTab label="ALL STATUS" />
         <StyledTab label="FOR RENT" />
         <StyledTab label="FOR SALE" />
@@ -216,15 +203,16 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
         spacing={3}
         sx={{
           p: 4,
+          mt: 0,
           justifyContent: "center",
-          alignItems: "end",
+          alignItems: "flex-start",
           backgroundColor: "white",
           borderRadius: "10px",
           boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
         }}
       >
-        {/* Property Type */}
-        <Grid item xs={12} sm={6} md={3}>
+        {/* LOOKING FOR */}
+        <Grid item xs={12} sm={6} md={3} lg={3} sx={{ display: "flex", flexDirection: "column" }}>
           <SectionLabel>
             <HomeIcon sx={{ fontSize: 16 }} />
             LOOKING FOR
@@ -248,8 +236,8 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
           </StyledTextField>
         </Grid>
 
-        {/* Location */}
-        <Grid item xs={12} sm={6} md={3}>
+        {/* LOCATION */}
+        <Grid item xs={12} sm={6} md={3} lg={3} sx={{ display: "flex", flexDirection: "column" }}>
           <SectionLabel>
             <LocationOnIcon sx={{ fontSize: 16 }} />
             LOCATION
@@ -269,8 +257,8 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
           />
         </Grid>
 
-        {/* Bedrooms */}
-        <Grid item xs={12} sm={6} md={3}>
+        {/* PROPERTY SIZE - hide below lg */}
+        <Grid item xs={12} sm={6} md={3} lg={3} sx={{ display: { xs: "none", lg: "block" } }}>
           <SectionLabel>
             <BedIcon sx={{ fontSize: 16 }} />
             PROPERTY SIZE
@@ -294,8 +282,8 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
           </StyledTextField>
         </Grid>
 
-        {/* Budget */}
-        <Grid item xs={12} sm={6} md={3}>
+        {/* BUDGET - hide below lg */}
+        <Grid item xs={12} sm={6} md={3} lg={3} sx={{ display: { xs: "none", lg: "block" } }}>
           <SectionLabel>
             <BedIcon sx={{ fontSize: 16 }} />
             YOUR BUDGET
@@ -311,8 +299,8 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
           />
         </Grid>
 
-        {/* Search Button */}
-        <Grid item xs={12} md={2}>
+        {/* SEARCH BUTTON - hide below lg */}
+        <Grid item xs={12} md={2} sx={{ display: { xs: "none", lg: "block" } }}>
           <StyledButton variant="contained" fullWidth onClick={handleSearchClick}>
             Search
           </StyledButton>

@@ -1,0 +1,116 @@
+.payment-container {
+  min-height: 100vh;
+  background: #f4f6fb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.payment-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  text-align: center;
+  animation: fadeIn 0.4s ease;
+}
+
+.payment-heading {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1d4ed8;
+  margin-bottom: 16px;
+}
+
+.payment-plan-box {
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.payment-plan-box h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.payment-price {
+  font-size: 22px;
+  font-weight: bold;
+  color: #1e40af;
+  margin-bottom: 6px;
+}
+
+.payment-gst {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.payment-proceed-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+  transition: 0.2s ease;
+  margin-bottom: 14px;
+}
+
+.payment-proceed-btn:hover {
+  opacity: 0.9;
+}
+
+.payment-cancel-btn {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  background: #e5e7eb;
+  color: #374151;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.payment-cancel-btn:hover {
+  background: #d1d5db;
+}
+
+/* Back button when no plan selected */
+.payment-back-btn {
+  padding: 10px 20px;
+  background: #2563eb;
+  color: white;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.payment-back-btn:hover {
+  opacity: 0.9;
+}
+
+/* Smooth Fade Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

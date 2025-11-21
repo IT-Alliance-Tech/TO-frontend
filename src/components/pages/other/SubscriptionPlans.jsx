@@ -62,6 +62,15 @@ const SubscriptionPlans = () => {
     fetchSubscriptionPlans();
   }, []);
 
+  // ⭐ NEW — After T&C accepted, navigate to payment page
+  const goToPaymentPage = (plan) => {
+    navigate("/payment", {
+      state: {
+        plan,
+      },
+    });
+  };
+
   const handleSubscribe = async (plan) => {
     try {
       const userId = user?.id || user?._id;
@@ -71,33 +80,8 @@ const SubscriptionPlans = () => {
         return navigate("/login");
       }
 
-      const subscribeResponse = await fetch(
-        buildApiUrl(API_CONFIG.SUBSCRIPTION.CREATE_FOR_USER),
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId,
-            planId: plan.id,
-
-            // ⭐ Added this field — backend receives it as true
-            tncAccepted: true,
-          }),
-        }
-      );
-
-      const result = await subscribeResponse.json();
-
-      if (result.success) {
-        navigate("/subscription/success", {
-          state: {
-            planName: plan.name,
-            subscriptionDetails: result,
-          },
-        });
-      } else {
-        alert(result.message || "Subscription failed");
-      }
+      // Skip backend subscription and go directly to payment page
+      goToPaymentPage(plan);
     } catch (err) {
       console.error("Subscription Error:", err);
       alert("Something went wrong! Try again.");
@@ -107,13 +91,9 @@ const SubscriptionPlans = () => {
   return (
     <section className="subscription-section">
       <div className="subscription-overview">
-        <h2 className="subscription-section-title">
-          Subscription Plans Overview
-        </h2>
+        <h2 className="subscription-section-title">Subscription Plans Overview</h2>
         <p className="subscription-section-description">
-          We offer three subscription plans to provide access to property
-          contact information. Each plan includes a limited number of house
-          contact details and has a validity period of 15 days
+          We offer three subscription plans to provide access to property contact information. Each plan includes a limited number of house contact details and has a validity period of 15 days
         </p>
       </div>
 
@@ -161,10 +141,7 @@ const SubscriptionPlans = () => {
                 style={{ boxShadow: theme.shadow }}
               >
                 <div className="subscription-plan-header">
-                  <h3
-                    className="subscription-plan-name"
-                    style={{ color: theme.text }}
-                  >
+                  <h3 className="subscription-plan-name" style={{ color: theme.text }}>
                     {plan.name}
                   </h3>
 
@@ -184,10 +161,7 @@ const SubscriptionPlans = () => {
 
                   <button
                     className="subscription-subscribe-button"
-                    style={{
-                      background: theme.button,
-                      boxShadow: theme.shadow,
-                    }}
+                    style={{ background: theme.button, boxShadow: theme.shadow }}
                     onClick={() => {
                       setSelectedPlan(plan);
                       setIsChecked(false);
@@ -208,24 +182,14 @@ const SubscriptionPlans = () => {
       {showModal && selectedPlan && (
         <div className="subscription-modal-overlay">
           <div className="subscription-modal-content">
-            <button
-              className="subscription-modal-close"
-              onClick={() => setShowModal(false)}
-            >
+            <button className="subscription-modal-close" onClick={() => setShowModal(false)}>
               ✕
             </button>
 
             <h2 className="modal-title">Terms & Conditions</h2>
 
             <div className="subscription-modal-summary">
-              <div
-                style={{
-                  marginBottom: "12px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
+              <div style={{ marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <input
                   type="checkbox"
                   checked={isChecked}
@@ -238,10 +202,7 @@ const SubscriptionPlans = () => {
                 <Link
                   to={isChecked ? "/termcondition" : "#"}
                   className="subscription-detailed-tnc-link"
-                  style={{
-                    pointerEvents: isChecked ? "auto" : "none",
-                    opacity: isChecked ? 1 : 0.5,
-                  }}
+                  style={{ pointerEvents: isChecked ? "auto" : "none", opacity: isChecked ? 1 : 0.5 }}
                 >
                   View Full Terms & Conditions →
                 </Link>
@@ -251,10 +212,7 @@ const SubscriptionPlans = () => {
             <button
               className="subscription-modal-continue"
               disabled={!isChecked}
-              style={{
-                opacity: isChecked ? 1 : 0.5,
-                cursor: isChecked ? "pointer" : "not-allowed",
-              }}
+              style={{ opacity: isChecked ? 1 : 0.5, cursor: isChecked ? "pointer" : "not-allowed" }}
               onClick={() => {
                 if (!isChecked) return;
                 setShowModal(false);

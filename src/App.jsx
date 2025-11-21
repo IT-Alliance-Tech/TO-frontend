@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -25,7 +24,10 @@ import ScrollToTop from './components/common/ScrollToTop'
 // ✅ Newly added imports
 import SuccessPage from './components/pages/subscription/SuccessPage'
 import ErrorPage from './components/pages/subscription/ErrorPage'
-import ProcessingPage from './components/pages/subscription/ProcessingPage' // <-- Added
+import ProcessingPage from './components/pages/subscription/ProcessingPage'
+
+// ✅ Added Payment Page import
+import PaymentPage from './components/pages/other/PaymentPage'
 
 import './styles/globals.css'
 import './styles/components.css'
@@ -33,7 +35,6 @@ import './styles/components.css'
 function AppContent() {
   const { user, isAuthenticated } = useAuth()
 
-  // Show Owner Dashboard for logged-in owners
   if (isAuthenticated && user?.role === 'owner') {
     return (
       <Layout>
@@ -44,20 +45,18 @@ function AppContent() {
     )
   }
 
-  // Show regular HomePage for other users
   return (
     <Layout>
       <ErrorBoundary>
-         <Suspense fallback={null}>
-        <NewHomePage />
-        <HomePage />
+        <Suspense fallback={null}>
+          <NewHomePage />
+          <HomePage />
         </Suspense>
       </ErrorBoundary>
     </Layout>
   )
 }
 
-// Helper component to wrap routes with Layout and ErrorBoundary
 const LayoutWrapper = ({ children }) => (
   <Layout>
     <ErrorBoundary>
@@ -74,10 +73,8 @@ function App() {
           <Router>
             <ScrollToTop />
             <Routes>
-              {/* Main App Route */}
               <Route path="/" element={<AppContent />} />
 
-              {/* Public Pages */}
               <Route path="/contact" element={<LayoutWrapper><ContactPage /></LayoutWrapper>} />
               <Route path="/about" element={<LayoutWrapper><AboutPage /></LayoutWrapper>} />
               <Route path="/privacy" element={<LayoutWrapper><PrivacyPolicy /></LayoutWrapper>} />
@@ -85,22 +82,22 @@ function App() {
               <Route path="/faq" element={<LayoutWrapper><FaqPage /></LayoutWrapper>} />
               <Route path="/properties" element={<LayoutWrapper><PropertiesPage /></LayoutWrapper>} />
 
-              {/* Subscription Plans Page */}
               <Route path="/subscription-plans" element={<LayoutWrapper><SubscriptionPlans /></LayoutWrapper>} />
 
-              {/* Property & User Pages */}
               <Route path="/property/:id" element={<LayoutWrapper><PropertyDetailsPage /></LayoutWrapper>} />
               <Route path="/wishlist" element={<LayoutWrapper><WishlistPage /></LayoutWrapper>} />
               <Route path="/my-bookings" element={<LayoutWrapper><MyBookings /></LayoutWrapper>} />
 
-              {/* ✅ FontPage / PhonePe Integration Result Pages */}
-              <Route path="/processing" element={<LayoutWrapper><ProcessingPage /></LayoutWrapper>} /> {/* <-- Added */}
+              {/* ✅ Added Payment Page Route */}
+              <Route path="/payment" element={<LayoutWrapper><PaymentPage /></LayoutWrapper>} />
+
+              {/* 💳 PhonePe workflow result pages */}
+              <Route path="/processing" element={<LayoutWrapper><ProcessingPage /></LayoutWrapper>} />
               <Route path="/success" element={<LayoutWrapper><SuccessPage /></LayoutWrapper>} />
               <Route path="/error" element={<LayoutWrapper><ErrorPage /></LayoutWrapper>} />
 
-              {/* Admin Routes */}
               <Route 
-                path="/system/admin/secure-access-portal-2025" 
+                path="/system/admin/secure-access-2025" 
                 element={<ErrorBoundary><SecretAdminAccess /></ErrorBoundary>} 
               />
               <Route 
@@ -108,7 +105,6 @@ function App() {
                 element={<ErrorBoundary><AdminDashboard /></ErrorBoundary>} 
               />
 
-              {/* Fallback Route */}
               <Route path="*" element={<AppContent />} />
             </Routes>
           </Router>

@@ -1,6 +1,6 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'https://backend-to-1.onrender.com/api',
+  BASE_URL: 'https://backend-to-1.onrender.com/',
   
   // Auth endpoints
   AUTH: {
@@ -42,10 +42,17 @@ export const API_CONFIG = {
     BOOKING_UPDATE: '/booking/:id/update-time',
   },
 
-  // ✅ Only these two subscription APIs are used now
+  // Subscription APIs
   SUBSCRIPTION: {
-    BASE: '/subscriptions',                    // localhost:5000/api/subscriptions
-    CREATE_FOR_USER: '/user-subscriptions/subscribe' // local/api/user-subscriptions/subscribe
+    BASE: '/subscriptions',
+    CREATE_FOR_USER: '/user-subscriptions/subscribe'
+  },
+
+  // ✅ PHONEPE PAYMENT APIs (added newly)
+  PAYMENTS: {
+    INITIATE: '/payment/phonepe/initiate',      // Create transaction
+    CALLBACK: '/payment/phonepe/callback',      // PhonePe callback
+    STATUS: '/payment/phonepe/status'           // Check payment status
   }
 }
 
