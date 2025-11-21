@@ -1,198 +1,158 @@
-/* All styles scoped under .subscription-section */
+/* MAIN SECTION */
 .subscription-section {
-  position: relative; /* Prevent affecting other sections */
   padding: 80px 20px;
-  background-color: #f9f9f9;
+  background: #f3f4f6;
   text-align: center;
 }
 
-/* Overview Section */
-.subscription-section .subscription-overview {
-  max-width: 750px;
-  margin: 0 auto 60px auto;
-}
-
-.subscription-section .subscription-section-title {
-  font-size: 2.5rem;
+/* TITLE */
+.subscription-section-title {
+  font-size: 2.7rem;
   font-weight: 700;
-  color: #3498db;
+  color: #1d4ed8;
   margin-bottom: 12px;
 }
 
-.subscription-section .subscription-section-description {
+.subscription-section-description {
   font-size: 1rem;
   color: #555;
-  line-height: 1.6;
-}
-
-/* Plans Container */
-.subscription-section .subscription-plans-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 50px;
-  max-width: 1200px;
+  max-width: 700px;
   margin: 0 auto;
 }
 
-/* Individual Plan Card */
-.subscription-section .subscription-plan-card {
-  width: 320px;
-  border-radius: 16px;
-  box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+/* FLEX CONTAINER */
+.subscription-plans-container {
   display: flex;
-  flex-direction: column;
-  transition: transform 0.3s, box-shadow 0.3s;
-  overflow: hidden;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 50px;
 }
 
-.subscription-section .subscription-plan-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+/* CARD */
+.subscription-plan-card {
+  width: 330px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 25px;
+  transition: 0.3s ease;
+  border: 1px solid #e5e7eb;
 }
 
-/* Plan Header */
-.subscription-section .subscription-plan-header {
-  padding: 25px 20px 15px 20px;
-  text-align: center;
+.subscription-plan-card:hover {
+  transform: translateY(-10px);
+  transition: 0.3s ease;
 }
 
-.subscription-section .subscription-plan-name {
-  font-size: 1.6rem;
-  font-weight: 600;
-  margin-bottom: 10px;
+/* TEXT */
+.subscription-plan-name {
+  font-size: 1.9rem;
+  font-weight: 800;
+  margin-bottom: 8px;
 }
 
-.subscription-section .subscription-plan-price {
-  font-size: 1.3rem;
-  font-weight: 600;
+.subscription-plan-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 8px;
 }
 
-.subscription-section .subscription-gst {
+.subscription-gst {
   display: block;
   font-size: 0.85rem;
-  font-weight: 600;
-  color: #000;
+  margin-top: 3px;
+  color: #555;
 }
 
-/* Plan Body */
-.subscription-section .subscription-plan-body {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.subscription-section .subscription-plan-includes,
-.subscription-section .subscription-plan-validity {
-  font-size: 1rem;
-  color: #333;
-}
-
-/* Subscribe Button */
-.subscription-section .subscription-subscribe-button {
-  margin-top: auto;
-  padding: 14px 0;
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.3s, transform 0.3s;
-  border-radius: 10px;
+/* SUBSCRIBE BUTTON */
+.subscription-subscribe-button {
+  margin-top: 20px;
+  width: auto;
+  padding: 12px 28px; /* horizontal padding increased */
   border: none;
-}
-
-.subscription-section .subscription-subscribe-button:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-}
-
-/* Tagline */
-.subscription-section .subscription-note {
-  margin-top: 30px;
-  font-size: 1rem;
-}
-
-.subscription-section .subscription-tnc-link {
-  color: #3498db;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border-radius: 14px;
   cursor: pointer;
-  text-decoration: underline;
+  transition: 0.3s ease;
 }
 
-/* Light Modal Overlay */
-.subscription-section .subscription-modal-overlay {
+.subscription-subscribe-button:hover {
+  transform: translateY(-3px);
+  opacity: 0.95;
+}
+
+/* MODAL OVERLAY */
+.subscription-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
+  inset: 0;
+  background: rgba(0,0,0,0.55);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* high, isolated to modal */
+  z-index: 2000;
 }
 
-/* Modal Content */
-.subscription-section .subscription-modal-content-light {
+/* MODAL BOX */
+.subscription-modal-content {
   background: #ffffff;
-  color: #000000;
-  padding: 30px;
   width: 90%;
-  max-width: 600px;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  max-width: 550px;
+  padding: 35px;
+  border-radius: 18px;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.3);
   position: relative;
-  max-height: 80vh;
-  overflow-y: auto;
-  animation: subscription-fadeIn 0.3s ease-in-out;
-  text-align: left;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-.subscription-section .subscription-close-modal-light {
+.subscription-modal-close {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 12px;
+  right: 12px;
   background: none;
-  color: #000000;
   border: none;
-  width: 30px;
-  height: 30px;
-  font-weight: bold;
+  font-size: 22px;
   cursor: pointer;
-  font-size: 16px;
-}
-/* Pay Now Button Container (below subscription cards) */
-.subscription-section .subscription-paynow-container {
-  margin-top: 40px; /* distance from subscription cards */
-  display: flex;
-  justify-content: center;
 }
 
-.subscription-section .subscription-modal-summary-light p,
-.subscription-section .subscription-modal-summary-light ul {
-  margin: 10px 0;
-  color: #000000;
+.modal-title {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #1d4ed8;
 }
 
-.subscription-section .subscription-modal-summary-light ul li {
-  list-style-type: disc;
-  margin-left: 20px;
+/* CONTENT */
+.subscription-modal-summary {
+  color: #333;
+  line-height: 1.6;
 }
 
-/* Detailed T&C Link */
-.subscription-section .subscription-detailed-tnc-link {
-  color: #3498db;
-  cursor: pointer;
+.subscription-detailed-tnc-link {
+  color: #2563eb;
   text-decoration: underline;
+  font-weight: 600;
 }
 
-.subscription-section .subscription-detailed-tnc-link:hover {
-  color: #1a73e8;
+.subscription-modal-continue {
+  margin-top: 25px;
+  width: 100%;
+  padding: 14px;
+  background: #2563eb;
+  color: white;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-/* Fade-in Animation for Modal */
-@keyframes subscription-fadeIn {
+.subscription-modal-continue:hover {
+  background: #1d4ed8;
+}
+
+/* ANIMATION */
+@keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
