@@ -22,7 +22,7 @@ const SubscriptionPlans = () => {
   const fetchSubscriptionPlans = async () => {
     try {
       const response = await fetch(
-        buildApiUrl(API_CONFIG.SUBSCRIPTION.BASE) + `?t=${Date.now()}`,
+        buildApiUrl(API_CONFIG.SUBSCRIPTION.BASE),
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
