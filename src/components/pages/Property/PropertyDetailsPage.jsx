@@ -6,6 +6,7 @@ import { handleApiError, getErrorMessage, validateApiResponse } from '../../../u
 import './PropertyDetailsPage.css'
 
 
+
 // MUI imports
 
 import {
@@ -56,6 +57,8 @@ import areaImg from '../../../assets/images/area.png';
 import trueOwnersLogo from "../../../assets/images/truownerslogo.png"
 import { Favorite, FavoriteOutlined } from '@mui/icons-material'
 import { styled } from "@mui/material/styles";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
 
 const PropertyDetailsPage = () => {
@@ -86,6 +89,15 @@ const PropertyDetailsPage = () => {
 const handleCopy = () => {
   navigator.clipboard.writeText(shareUrl);
   alert("Link copied!");
+};
+const [snackbar, setSnackbar] = useState({
+  open: false,
+  message: "",
+  severity: "info"
+});
+
+const handleCloseSnackbar = () => {
+  setSnackbar({ ...snackbar, open: false });
 };
 
 
@@ -180,7 +192,6 @@ const handleCopy = () => {
       setLoading(false)
     }
   }
-
 
 
   const contactOwnerFn = async () => {
@@ -443,36 +454,51 @@ const handleCopy = () => {
     return !bookingInfo.userHasBooking || getCurrentUserBookings().length === 0
   }
 
-  // Booking functionality
-  const handleBookVisit = () => {
-    if (!isAuthenticated) {
-      localStorage.setItem('redirectAfterLogin', `/property/${id}`)
-      navigate('/login')
-      return
-    }
-
-    if (user?.role !== 'user') {
-      alert('Only users can book property visits')
-      return
-    }
-
-    setBookingDialogOpen(true)
-    setBookingError('')
-    setBookingSuccess(false)
-    setIsEditMode(false)
-    setEditingBookingId(null)
+  
+  // Booking functionality (with subscription check)
+const handleBookVisit = () => {
+  if (!isAuthenticated) {
+    setSnackbar({
+      open: true,
+      severity: "error",
+      message: "Please login to continue"
+    });
+    localStorage.setItem("redirectAfterLogin", `/property/${id}`);
+    navigate("/login");
+    return;
   }
 
-  // Edit booking functionality
-  const handleEditBooking = (booking) => {
-    setIsEditMode(true)
-    setEditingBookingId(booking.id || booking._id) // Handle both id formats
-    setSelectedDate(dayjs(booking.date))
-    setSelectedTimeSlot(booking.timeSlot)
-    setBookingDialogOpen(true)
-    setBookingError('')
-    setBookingSuccess(false)
+  if (user?.role !== "user") {
+    setSnackbar({
+      open: true,
+      severity: "error",
+      message: "Only normal users can book property visits"
+    });
+    return;
   }
+
+  if (!bookingInfo?.userHasSubscription) {
+    setSnackbar({
+      open: true,
+      severity: "warning",
+      message: "Please subscribe to a plan to book a visit."
+    });
+    return;
+  }
+
+  setBookingDialogOpen(true);
+  setBookingError("");
+  setBookingSuccess(false);
+  setIsEditMode(false);
+  setEditingBookingId(null);
+
+  setSnackbar({
+    open: true,
+    severity: "success",
+    message: "You can now select date & time slot"
+  });
+};
+
 
   const handleBookingSubmit = async () => {
     if (!selectedDate || !selectedTimeSlot) {
@@ -887,7 +913,7 @@ const handleCopy = () => {
   sx={{
     position: "absolute",
     top: 8,
-    right: 60, // adjust 48px so it doesn't overlap wishlist button
+    right: 60,
     backgroundColor: "rgba(255, 255, 255, 0.9)",
     color: "#2F80ED",
     zIndex: 1,
@@ -900,6 +926,8 @@ const handleCopy = () => {
 >
   <CalendarTodayIcon />
 </IconButton>
+
+
 
               {/* Wishlist Icon */}
 
@@ -1363,6 +1391,23 @@ const handleCopy = () => {
     </Box>
   </DialogContent>
 </Dialog>
+<Snackbar
+  open={snackbar.open}
+  autoHideDuration={3000}
+  onClose={handleCloseSnackbar}
+  anchorOrigin={{ vertical: "top", horizontal: "center" }}
+>
+  <MuiAlert
+    onClose={handleCloseSnackbar}
+    severity={snackbar.severity}
+    variant="filled"
+    elevation={6}
+    sx={{ width: "100%" }}
+  >
+    {snackbar.message}
+  </MuiAlert>
+</Snackbar>
+
 
       </div>
     </LocalizationProvider>

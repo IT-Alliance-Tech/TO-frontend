@@ -181,7 +181,7 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
 
   return (
     <div>
-      {/* Status Tabs - Show above 992px only */}
+      {/* Status Tabs - Only for 992px and above */}
       <StyledTabs
         value={statusTab}
         onChange={handleTabChange}
@@ -212,7 +212,7 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
         }}
       >
         {/* LOOKING FOR */}
-        <Grid item xs={12} sm={6} md={3} lg={3} sx={{ display: "flex", flexDirection: "column" }}>
+        <Grid item xs={12} sm={6} md={6} lg={3}>
           <SectionLabel>
             <HomeIcon sx={{ fontSize: 16 }} />
             LOOKING FOR
@@ -237,7 +237,7 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
         </Grid>
 
         {/* LOCATION */}
-        <Grid item xs={12} sm={6} md={3} lg={3} sx={{ display: "flex", flexDirection: "column" }}>
+        <Grid item xs={12} sm={6} md={6} lg={3}>
           <SectionLabel>
             <LocationOnIcon sx={{ fontSize: 16 }} />
             LOCATION
@@ -257,8 +257,8 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
           />
         </Grid>
 
-        {/* PROPERTY SIZE - hide below lg */}
-        <Grid item xs={12} sm={6} md={3} lg={3} sx={{ display: { xs: "none", lg: "block" } }}>
+        {/* PROPERTY SIZE (Hide below 992px) */}
+        <Grid item xs={12} lg={3} sx={{ display: { xs: "none", lg: "block" } }}>
           <SectionLabel>
             <BedIcon sx={{ fontSize: 16 }} />
             PROPERTY SIZE
@@ -282,8 +282,8 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
           </StyledTextField>
         </Grid>
 
-        {/* BUDGET - hide below lg */}
-        <Grid item xs={12} sm={6} md={3} lg={3} sx={{ display: { xs: "none", lg: "block" } }}>
+        {/* BUDGET (Hide below 992px) */}
+        <Grid item xs={12} lg={3} sx={{ display: { xs: "none", lg: "block" } }}>
           <SectionLabel>
             <BedIcon sx={{ fontSize: 16 }} />
             YOUR BUDGET
@@ -299,9 +299,9 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
           />
         </Grid>
 
-        {/* SEARCH BUTTON - hide below lg */}
-        <Grid item xs={12} md={2} sx={{ display: { xs: "none", lg: "block" } }}>
-          <StyledButton variant="contained" fullWidth onClick={handleSearchClick}>
+        {/* SEARCH BUTTON (Show on ALL screens) */}
+        <Grid item xs={12} sm={12} md={12} lg={2}>
+          <StyledButton fullWidth variant="contained" onClick={handleSearchClick}>
             Search
           </StyledButton>
         </Grid>
