@@ -33,9 +33,10 @@ const PropertyCard = ({
   onLoginRequired,
   onViewDetails,
   onWishlistToggle,
-  postType
+  postType,
 }) => {
   const { isIn, toggle } = useWishlist();
+  const isGuest = !isAuthenticated; // Guest flag
 
   if (!property) {
     console.error("PropertyCard: No property data provided");
@@ -57,9 +58,13 @@ const PropertyCard = ({
       .join(" ");
   };
 
+  // ⭐ ONLY LOCATION IS HIDDEN FOR GUEST
   const getLocationString = (location) => {
     try {
+      if (isGuest) return "Login to view location";
+
       if (typeof location === "string" && location.trim()) return capitalizeText(location);
+
       if (location && typeof location === "object") {
         if (location.address) return capitalizeText(location.address);
         if (location.street) return capitalizeText(location.street);
@@ -67,11 +72,17 @@ const PropertyCard = ({
           return capitalizeText(`${location.city}, ${location.state}`);
         if (location.city) return capitalizeText(location.city);
       }
+
       return "Location Not Specified";
-    } catch (error) {
-      console.warn("Error parsing location:", error);
+    } catch {
       return "Location Not Specified";
     }
+  };
+
+  // ⭐ AMENITIES SHOULD NOT BE HIDDEN ANYMORE
+  const formatNumber = (value) => {
+    const num = parseInt(value, 10) || 0;
+    return num === 0 ? "N/A" : String(num);
   };
 
   const formatCurrency = (amount) => {
@@ -80,11 +91,6 @@ const PropertyCard = ({
     if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
     if (num >= 1000) return `₹${(num / 1000).toFixed(0)}K`;
     return `₹${num.toLocaleString()}`;
-  };
-
-  const formatNumber = (value) => {
-    const num = parseInt(value, 10) || 0;
-    return num === 0 ? "N/A" : String(num);
   };
 
   const getSafeImages = (images) => {
@@ -101,20 +107,13 @@ const PropertyCard = ({
   };
 
   const getPropertyId = () => {
-    if (!property.id && !property._id) {
-      console.error("PropertyCard: Property missing ID", property);
-      return null;
-    }
+    if (!property.id && !property._id) return null;
     let id = property.id || property._id;
-    if (typeof id === "object" && id !== null) {
-      if (id.toString && typeof id.toString === "function") {
-        id = id.toString();
-      } else if (id.$oid) {
-        id = id.$oid;
-      } else {
-        console.error("PropertyCard: Invalid property ID format", id);
-        return null;
-      }
+
+    if (typeof id === "object") {
+      if (id.toString) id = id.toString();
+      else if (id.$oid) id = id.$oid;
+      else return null;
     }
     return String(id);
   };
@@ -122,86 +121,36 @@ const PropertyCard = ({
   const handleViewDetailsClick = (e) => {
     e.stopPropagation();
     const propertyId = getPropertyId();
-    if (!propertyId) {
-      console.error("PropertyCard: Cannot view details - invalid property ID");
-      alert("Error: Property ID is invalid");
-      return;
-    }
+    if (!propertyId) return;
+
     if (!isAuthenticated) {
-      try {
-        localStorage.setItem("redirectAfterLogin", `/property/${propertyId}`);
-      } catch (error) {
-        console.warn("Could not save redirect URL to localStorage:", error);
-      }
-      if (onLoginRequired) {
-        onLoginRequired();
-      } else {
-        alert("Please login to view details");
-      }
+      localStorage.setItem("redirectAfterLogin", `/property/${propertyId}`);
+      onLoginRequired?.();
       return;
     }
-    if (onViewDetails) {
-      try {
-        onViewDetails(propertyId);
-      } catch (error) {
-        console.error("Error in onViewDetails callback:", error);
-        alert("Error loading property details");
-      }
-    } else {
-      try {
-        window.location.href = `/property/${propertyId}`;
-      } catch (error) {
-        console.error("Error navigating to property:", error);
-        alert("Error navigating to property details");
-      }
-    }
+
+    onViewDetails?.(propertyId);
   };
 
   const handleWishlistClick = (e) => {
     e.stopPropagation();
     const propertyId = getPropertyId();
-    if (!propertyId) {
-      console.error(
-        "PropertyCard: Cannot toggle wishlist - invalid property ID"
-      );
-      return;
-    }
-    if (!isAuthenticated) {
-      if (onLoginRequired) {
-        onLoginRequired();
-      } else {
-        alert("Please login to add to wishlist");
-      }
-      return;
-    }
-    try {
-      const currentState = isIn(propertyId);
-      const nextState = !currentState;
-      toggle(propertyId);
-      if (onWishlistToggle) {
-        onWishlistToggle(nextState);
-      }
-      console.log(
-        `Property ${propertyId} ${nextState ? "added to" : "removed from"} wishlist`
-      );
-    } catch (error) {
-      console.error("Error toggling wishlist:", error);
-      alert("Error updating wishlist");
-    }
-  };
+    if (!propertyId) return;
 
-  const handleImageError = (e) => {
-    e.currentTarget.style.display = "none";
-    const placeholder = e.currentTarget.nextElementSibling;
-    if (placeholder) placeholder.style.display = "flex";
+    if (!isAuthenticated) {
+      onLoginRequired?.();
+      return;
+    }
+
+    const currentState = isIn(propertyId);
+    toggle(propertyId);
+    onWishlistToggle?.(!currentState);
   };
 
   const propertyId = getPropertyId();
   const safeImages = getSafeImages(property?.images);
+
   const wishlisted = propertyId ? isIn(propertyId) : false;
-  const bedrooms = formatNumber(property?.bedrooms);
-  const bathrooms = formatNumber(property?.bathrooms);
-  const area = formatNumber(property?.area);
 
   return (
     <div className="property-card" onClick={handleViewDetailsClick}>
@@ -213,101 +162,62 @@ const PropertyCard = ({
         <WishlistButton
           onClick={handleWishlistClick}
           size="small"
-          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          title={
-            !isAuthenticated
-              ? "Login to add to wishlist"
-              : wishlisted
-              ? "Remove from wishlist"
-              : "Add to wishlist"
-          }
-          isWishlisted={wishlisted && isAuthenticated}
-          disabled={!propertyId}
+          isWishlisted={wishlisted && !isGuest}
         >
-          {wishlisted && isAuthenticated ? (
-            <Favorite sx={{ color: "#d32f2f" }} />
-          ) : (
-            <FavoriteOutlined />
-          )}
+          {wishlisted && !isGuest ? <Favorite sx={{ color: "#d32f2f" }} /> : <FavoriteOutlined />}
         </WishlistButton>
 
         {safeImages.length > 0 ? (
-          <div
-            style={{
-              position: "relative",
-              display: "inline-block",
-              width: "100%",
-            }}
-          >
+          <div style={{ position: "relative", width: "100%" }}>
             <img
               className="property-card__image"
               src={safeImages[0]}
               alt={property?.title || "Property"}
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = fallbackImg;
-              }}
+              onError={(e) => (e.currentTarget.src = fallbackImg)}
             />
             <img src={watermark} alt="Watermark" className="property-overlay" />
           </div>
         ) : (
-          <div
-            style={{
-              position: "relative",
-              display: "inline-block",
-              width: "100%",
-            }}
-          >
-            <img
-              className="property-card__image"
-              src={fallbackImg}
-              alt="Fallback"
-            />
+          <div style={{ position: "relative", width: "100%" }}>
+            <img className="property-card__image" src={fallbackImg} alt="Fallback" />
             <img src={watermark} alt="Watermark" className="property-overlay" />
           </div>
         )}
       </div>
 
       <div className="property-card__content">
-        <div
-          className="property-card__pricing"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <span className="property-card__price">
-            {formatCurrency(property?.rent)}
-          </span>
-          <span className="property-card__status-all">
-            {postType}
-          </span>
+        <div className="property-card__pricing">
+          <span className="property-card__price">{formatCurrency(property?.rent)}</span>
+          <span className="property-card__status-all">{postType}</span>
         </div>
 
-        <h3 title={property?.title} className="property-card__title">
+        <h3 className="property-card__title">
           {capitalizeText(property?.title) || "Untitled Property"}
         </h3>
 
+        {/* ⭐ ONLY LOCATION IS HIDDEN — NOT AMENITIES */}
         <div
-          className="property-card__location"
+          className={`property-card__location ${isGuest ? "blur-text" : ""}`}
           title={getLocationString(property?.location)}
         >
           <span>{getLocationString(property?.location)}</span>
         </div>
 
+        {/* ⭐ Amenities contain NO BLUR now */}
         <div className="property-card__specs">
           <div className="property-card__spec">
             <img src={bed} alt="bedrooms" />
-            <span>{bedrooms}</span>
+            <span>{formatNumber(property?.bedrooms)}</span>
           </div>
+
           <div className="property-card__spec">
-            <img src={bath} alt="bathroom" />
-            <span>{bathrooms}</span>
+            <img src={bath} alt="bathrooms" />
+            <span>{formatNumber(property?.bathrooms)}</span>
           </div>
+
           <div className="property-card__spec">
             <img src={areaImg} alt="area" />
-            <span>{area}</span>
+            <span>{formatNumber(property?.area)}</span>
           </div>
         </div>
 
@@ -315,16 +225,11 @@ const PropertyCard = ({
           <button
             className={`property-card__action-btn ${
               isAuthenticated ? "authenticated" : "unauthenticated"
-            } rounded-2`}
+            }`}
             onClick={handleViewDetailsClick}
             type="button"
-            disabled={!propertyId}
           >
-            {!propertyId
-              ? "Property Unavailable"
-              : isAuthenticated
-              ? "View Details"
-              : "Login to View Details"}
+            {isAuthenticated ? "View Details" : "Login to View Details"}
           </button>
         </div>
       </div>
