@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react'
 import './HomePage.css'
 
@@ -12,8 +11,10 @@ const PropertyDetailsModal = ({
   onNextPage,
   onPrevPage,
   currentPage,
-  totalPages
+  totalPages,
+  isSubscribed 
 }) => {
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   const formatCurrency = (amount) => {
@@ -46,6 +47,21 @@ const PropertyDetailsModal = ({
     return []
   }
 
+  const getLocationString = (loc) => {
+    if (!loc) return ''
+    if (typeof loc === 'string') return loc
+    if (typeof loc === 'object') {
+      const parts = []
+      if (loc.address) parts.push(loc.address)
+      if (loc.area) parts.push(loc.area)
+      if (loc.city) parts.push(loc.city)
+      if (loc.state) parts.push(loc.state)
+      if (loc.country) parts.push(loc.country)
+      return parts.filter(Boolean).join(', ')
+    }
+    return String(loc)
+  }
+
   const handleWishlistClick = () => {
     if (!isAuthenticated) {
       onAuthPrompt()
@@ -58,18 +74,25 @@ const PropertyDetailsModal = ({
     window.location.href = '/subscription-plans'
   }
 
+  const handleSubscribeClick = () => {
+    window.location.href = '/subscription-plans'
+  }
+
   const safeImages = getSafeImages(property.images)
   const safeAmenities = getSafeAmenities(property.amenities)
+  const locationString = getLocationString(property.location)
 
   return (
     <div className="property-details-overlay">
       <div className="property-details-modal">
+
         <div className="modal-header">
           <h2>{property.title || 'Property Details'}</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
 
         <div className="modal-content">
+
           {safeImages.length > 0 && (
             <div className="image-gallery">
               <div className="main-image">
@@ -114,11 +137,24 @@ const PropertyDetailsModal = ({
           )}
 
           <div className="property-info">
+
             <div className="property-header">
               <div className="property-basic-info">
                 <h1>{property.title || 'Untitled Property'}</h1>
 
-                {/* LOCATION HIDDEN */}
+                {/* -------------------------
+                    LOCATION (HIDDEN IF NOT SUBSCRIBED)
+                ------------------------- */}
+                {isSubscribed ? (
+                  locationString ? <div className="property-location">{locationString}</div> : null
+                ) : (
+                  <div className="property-location-hidden">
+                    <span>Hidden — subscribe to view</span>
+                    <button className="btn btn-link subscribe-inline" onClick={handleSubscribeClick}>
+                      Subscribe
+                    </button>
+                  </div>
+                )}
 
                 <div className="property-specs">
                   <span>{property.bedrooms || 0} Bedrooms</span>
@@ -174,20 +210,37 @@ const PropertyDetailsModal = ({
             )}
 
             <div className="property-meta">
-              <div className="meta-item">
-                <strong>Property ID:</strong> {property.id}
-              </div>
+
+              {/* -------------------------
+                  PROPERTY ID (HIDDEN IF NOT SUBSCRIBED)
+              ------------------------- */}
+              {isSubscribed ? (
+                <div className="meta-item">
+                  <strong>Property ID:</strong> {property.id}
+                </div>
+              ) : (
+                <div className="meta-item">
+                  <strong>Property ID:</strong> 
+                  <span> Hidden — subscribe to view</span>
+                  <button className="btn btn-link subscribe-inline" onClick={handleSubscribeClick}>
+                    Subscribe
+                  </button>
+                </div>
+              )}
+
               <div className="meta-item">
                 <strong>Listed on:</strong> {formatDate(property.createdAt)}
               </div>
+
               <div className="meta-item">
                 <strong>Status:</strong> <span className="status-live">🟢 Available</span>
               </div>
+
             </div>
+
           </div>
         </div>
 
-        {/* PAGINATION ADDED */}
         <div className="pagination-controls">
           <button 
             className="btn btn-secondary"
@@ -212,6 +265,7 @@ const PropertyDetailsModal = ({
           <button className="btn btn-secondary" onClick={onClose}>Close</button>
           <button className="btn btn-primary" onClick={handleContactOwner}>Contact Owner</button>
         </div>
+
       </div>
     </div>
   )
