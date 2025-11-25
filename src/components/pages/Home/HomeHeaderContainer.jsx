@@ -3,7 +3,7 @@ import "./home.css";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import headerImage from "../../../assets/images/home/truownerss.png"; // ✅ corrected path
-import search from "../../../assets/images/home/search.svg";
+import search from "../../../assets/images/home/search.svg"; 
 import useScreenSize from "../../helper/userScreenSize.jsx";
 import PropertyTypeSelect from "../search-screen/propertyTypeSelect.jsx";
 import { BudgetFilter } from "../search-screen/budgetFilter.jsx";
