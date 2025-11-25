@@ -11,7 +11,7 @@
 }
 
 .search_city_input_width {
-  width: 21rem;
+  width: 15rem;
 }
 
 .input_design {
@@ -20,7 +20,7 @@
 }
 
 .search_city_input {
-  width: 18rem;
+  width: 10.5rem;
 }
 
 .search_city_input::placeholder {
@@ -28,12 +28,11 @@
   font-size: 12px;
 }
 
-.property_type_input_width {
-  width: 12rem;
-}
-
+.property_type_input_width { width: 8rem; }
+.property_type_input_width { width: 5rem; }
+.property_type_input_width { width: 4rem; }
 .budget_input_width {
-  width: 8rem;
+  width: 4rem;
 }
 
 .search_localities_dropdown_content {
@@ -273,7 +272,7 @@
     position: absolute;
     top: auto;
     left: 50%;
-    transform: translate(-50%, -50%);
+    /* transform: translate(-50%, -50%); */
   }
 
   .input_design {
@@ -282,7 +281,7 @@
   }
 
   .search_city_input {
-    width: 12.5rem;
+    width: 15rem;
   }
 
   .search_city_input::placeholder {
@@ -295,7 +294,7 @@
   }
 
   .budget_input_width {
-    width: 6rem;
+    width: 4rem;
   }
 
   .home_villa_section_container {
@@ -347,7 +346,7 @@
     position: absolute;
     top: auto;
     left: 50%;
-    transform: translate(-50%, -50%);
+    /* transform: translate(-50%, -50%); */
   }
 
   .input_design {
@@ -737,7 +736,7 @@
     margin-top: 100px !important;
   }
   .search-filter-container {
-    margin-top: 200px;
+    margin-top: 10px;
 }
 
 }
@@ -746,7 +745,14 @@
     margin-top: 100px !important;
   }
    .search-filter-container {
-    margin-top: 500px;
+    margin-top: 10px;
 }
 
 }
+
+@media only screen and (max-width: 992px) {
+  .home_filter_main_container {
+    transform: translate(-50%, -60%) !important;  /* Moves filter UP */
+  }
+}
+

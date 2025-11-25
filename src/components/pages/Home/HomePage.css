@@ -1323,3 +1323,51 @@ flex-direction: row;
     line-height: 1.5;
   }
 }
+
+/* Center property cards on mobile view */
+@media (max-width: 576px) {
+  .properties-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .property-card {
+    width: 90% !important; /* keeps card nicely sized */
+    max-width: 350px;      /* prevents stretching */
+  }
+}
+
+/* Mobile (up to 576px) and Tablet (up to 1024px): center the property cards */
+@media (max-width: 1024px) {
+  .properties-grid {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 2rem;
+  }
+
+  .property-card {
+    width: 90% !important;
+    max-width: 350px;
+  }
+}
+
+/* Tablet & mobile spacing */
+@media (max-width: 1024px) {
+  .premium-section {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+}
+
+/* Mobile-specific tighter spacing */
+@media (max-width: 576px) {
+  .premium-section {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+

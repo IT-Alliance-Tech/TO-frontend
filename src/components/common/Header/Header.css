@@ -319,10 +319,10 @@
 @media (max-width: 768px) {
 
 .header-content {
-      display: flex;
-    align-items: center;
-    justify-content: space-around;
-}
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
 
   /* Hide desktop nav */
   .desktop-nav {
@@ -368,6 +368,26 @@
   align-items: center;
   gap: var(--spacing-4);
 }
+
+
+/* Mobile menu buttons (Sign Up, Login, Property Owners) */
+.mobile-nav .btn-mobile {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* Remove any gradient or custom color classes overriding it */
+.mobile-nav .color-change,
+.mobile-nav .color-change1,
+.mobile-nav .color-change2 {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #ddd !important;
+}
+
 
 /* Wishlist Button Styles */
 .wishlist-header-btn {
@@ -508,4 +528,11 @@
 
 .info-dropdown:hover .info-dropdown-menu {
   display: block;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    margin-left: auto !important;
+    margin-right: 20px !important; /* adjust this value if you want more right */
+  }
 }
