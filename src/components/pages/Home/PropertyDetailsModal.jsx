@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react'
 import './HomePage.css'
 
@@ -7,22 +8,13 @@ const PropertyDetailsModal = ({
   isInWishlist, 
   onWishlistToggle, 
   isAuthenticated, 
-  onAuthPrompt 
+  onAuthPrompt,
+  onNextPage,
+  onPrevPage,
+  currentPage,
+  totalPages
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-
-  const getLocationString = (location) => {
-    if (typeof location === 'string') {
-      return location
-    }
-    if (location && typeof location === 'object') {
-      if (location.address) return location.address
-      if (location.street) return location.street
-      if (location.city && location.state) return `${location.city}, ${location.state}`
-      return 'Location not specified'
-    }
-    return 'Location not specified'
-  }
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -63,12 +55,7 @@ const PropertyDetailsModal = ({
   }
 
   const handleContactOwner = () => {
-    if (!isAuthenticated) {
-      onAuthPrompt()
-      return
-    }
-    // TODO: Implement contact owner functionality
-    alert('Contact owner functionality coming soon!')
+    window.location.href = '/subscription-plans'
   }
 
   const safeImages = getSafeImages(property.images)
@@ -83,40 +70,33 @@ const PropertyDetailsModal = ({
         </div>
 
         <div className="modal-content">
-          {/* Image Gallery */}
           {safeImages.length > 0 && (
             <div className="image-gallery">
               <div className="main-image">
                 <img 
                   src={safeImages[currentImageIndex]} 
                   alt={`${property.title} - Image ${currentImageIndex + 1}`}
-                  onError={(e) => {
-                    e.target.src = '/placeholder-property.jpg'
-                  }}
+                  onError={(e) => { e.target.src = '/placeholder-property.jpg' }}
                 />
-                
+
                 {safeImages.length > 1 && (
                   <>
                     <button 
                       className="image-nav prev"
-                      onClick={() => setCurrentImageIndex(prev => 
-                        prev === 0 ? safeImages.length - 1 : prev - 1
-                      )}
+                      onClick={() => setCurrentImageIndex(prev => prev === 0 ? safeImages.length - 1 : prev - 1)}
                     >
                       ‹
                     </button>
                     <button 
                       className="image-nav next"
-                      onClick={() => setCurrentImageIndex(prev => 
-                        prev === safeImages.length - 1 ? 0 : prev + 1
-                      )}
+                      onClick={() => setCurrentImageIndex(prev => prev === safeImages.length - 1 ? 0 : prev + 1)}
                     >
                       ›
                     </button>
                   </>
                 )}
               </div>
-              
+
               {safeImages.length > 1 && (
                 <div className="image-thumbnails">
                   {safeImages.map((image, index) => (
@@ -133,12 +113,13 @@ const PropertyDetailsModal = ({
             </div>
           )}
 
-          {/* Property Information */}
           <div className="property-info">
             <div className="property-header">
               <div className="property-basic-info">
                 <h1>{property.title || 'Untitled Property'}</h1>
-                <p className="location">📍 {getLocationString(property.location)}</p>
+
+                {/* LOCATION HIDDEN */}
+
                 <div className="property-specs">
                   <span>{property.bedrooms || 0} Bedrooms</span>
                   <span>{property.bathrooms || 0} Bathrooms</span>
@@ -146,12 +127,11 @@ const PropertyDetailsModal = ({
                   <span className="property-type">{property.propertyType || 'Property'}</span>
                 </div>
               </div>
-              
+
               <div className="property-actions">
                 <button 
                   className={`wishlist-btn large ${isInWishlist ? 'active' : ''}`}
                   onClick={handleWishlistClick}
-                  title={isAuthenticated ? (isInWishlist ? 'Remove from wishlist' : 'Add to wishlist') : 'Login to add to wishlist'}
                 >
                   {isInWishlist ? '❤️' : '🤍'}
                 </button>
@@ -168,12 +148,12 @@ const PropertyDetailsModal = ({
                   Security Deposit: {formatCurrency(property.deposit)}
                 </div>
               </div>
-              
+
               <button 
                 className="btn btn-primary btn-large contact-btn"
                 onClick={handleContactOwner}
               >
-                {isAuthenticated ? '📞 Contact Owner' : '🔐 Login to Contact'}
+                Contact Owner
               </button>
             </div>
 
@@ -183,13 +163,11 @@ const PropertyDetailsModal = ({
             </div>
 
             {safeAmenities.length > 0 && (
-              <div className="amenities-section" sx={{color:'#2F80ED'}}>
+              <div className="amenities-section">
                 <h3>Amenities</h3>
                 <div className="amenities-grid">
                   {safeAmenities.map(amenity => (
-                    <span key={amenity} className="amenity-item">
-                      ✓ {amenity}
-                    </span>
+                    <span key={amenity} className="amenity-item">✓ {amenity}</span>
                   ))}
                 </div>
               </div>
@@ -203,23 +181,36 @@ const PropertyDetailsModal = ({
                 <strong>Listed on:</strong> {formatDate(property.createdAt)}
               </div>
               <div className="meta-item">
-                <strong>Status:</strong> 
-                <span className="status-live">🟢 Available</span>
+                <strong>Status:</strong> <span className="status-live">🟢 Available</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button className="btn btn-secondary" onClick={onClose}>
-            Close
-          </button>
+        {/* PAGINATION ADDED */}
+        <div className="pagination-controls">
           <button 
-            className="btn btn-primary"
-            onClick={handleContactOwner}
+            className="btn btn-secondary"
+            onClick={onPrevPage}
+            disabled={currentPage === 1}
           >
-            {isAuthenticated ? 'Contact Owner' : 'Login to Contact'}
+            Prev
           </button>
+
+          <span className="pagination-status">Page {currentPage} of {totalPages}</span>
+
+          <button 
+            className="btn btn-secondary"
+            onClick={onNextPage}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>Close</button>
+          <button className="btn btn-primary" onClick={handleContactOwner}>Contact Owner</button>
         </div>
       </div>
     </div>
