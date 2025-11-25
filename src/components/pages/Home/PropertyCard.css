@@ -292,6 +292,11 @@
   opacity: 0.5;
   pointer-events: none;
 }
+.property-card__pricing {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
 
 /* Responsive Design */

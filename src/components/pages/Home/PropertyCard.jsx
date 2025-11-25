@@ -36,7 +36,8 @@ const PropertyCard = ({
   postType,
 }) => {
   const { isIn, toggle } = useWishlist();
-  const isGuest = !isAuthenticated; // Guest flag
+
+  const isGuest = !isAuthenticated;
 
   if (!property) {
     console.error("PropertyCard: No property data provided");
@@ -58,11 +59,9 @@ const PropertyCard = ({
       .join(" ");
   };
 
-  // ⭐ ONLY LOCATION IS HIDDEN FOR GUEST
   const getLocationString = (location) => {
     try {
       if (isGuest) return "Login to view location";
-
       if (typeof location === "string" && location.trim()) return capitalizeText(location);
 
       if (location && typeof location === "object") {
@@ -72,17 +71,11 @@ const PropertyCard = ({
           return capitalizeText(`${location.city}, ${location.state}`);
         if (location.city) return capitalizeText(location.city);
       }
-
       return "Location Not Specified";
-    } catch {
+    } catch (error) {
+      console.warn("Error parsing location:", error);
       return "Location Not Specified";
     }
-  };
-
-  // ⭐ AMENITIES SHOULD NOT BE HIDDEN ANYMORE
-  const formatNumber = (value) => {
-    const num = parseInt(value, 10) || 0;
-    return num === 0 ? "N/A" : String(num);
   };
 
   const formatCurrency = (amount) => {
@@ -91,6 +84,11 @@ const PropertyCard = ({
     if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
     if (num >= 1000) return `₹${(num / 1000).toFixed(0)}K`;
     return `₹${num.toLocaleString()}`;
+  };
+
+  const formatNumber = (value) => {
+    const num = parseInt(value, 10) || 0;
+    return num === 0 ? "N/A" : String(num);
   };
 
   const getSafeImages = (images) => {
@@ -107,13 +105,20 @@ const PropertyCard = ({
   };
 
   const getPropertyId = () => {
-    if (!property.id && !property._id) return null;
+    if (!property.id && !property._id) {
+      console.error("PropertyCard: Property missing ID", property);
+      return null;
+    }
     let id = property.id || property._id;
-
-    if (typeof id === "object") {
-      if (id.toString) id = id.toString();
-      else if (id.$oid) id = id.$oid;
-      else return null;
+    if (typeof id === "object" && id !== null) {
+      if (id.toString && typeof id.toString === "function") {
+        id = id.toString();
+      } else if (id.$oid) {
+        id = id.$oid;
+      } else {
+        console.error("PropertyCard: Invalid property ID format", id);
+        return null;
+      }
     }
     return String(id);
   };
@@ -121,15 +126,26 @@ const PropertyCard = ({
   const handleViewDetailsClick = (e) => {
     e.stopPropagation();
     const propertyId = getPropertyId();
-    if (!propertyId) return;
+    if (!propertyId) return alert("Error: Property ID is invalid");
 
     if (!isAuthenticated) {
-      localStorage.setItem("redirectAfterLogin", `/property/${propertyId}`);
-      onLoginRequired?.();
+      try {
+        localStorage.setItem("redirectAfterLogin", `/property/${propertyId}`);
+      } catch {}
+      if (onLoginRequired) onLoginRequired();
+      else alert("Please login to view details");
       return;
     }
 
-    onViewDetails?.(propertyId);
+    if (onViewDetails) {
+      try {
+        onViewDetails(propertyId);
+      } catch {
+        alert("Error loading property details");
+      }
+    } else {
+      window.location.href = `/property/${propertyId}`;
+    }
   };
 
   const handleWishlistClick = (e) => {
@@ -138,64 +154,87 @@ const PropertyCard = ({
     if (!propertyId) return;
 
     if (!isAuthenticated) {
-      onLoginRequired?.();
+      if (onLoginRequired) onLoginRequired();
+      else alert("Please login to add to wishlist");
       return;
     }
 
-    const currentState = isIn(propertyId);
-    toggle(propertyId);
-    onWishlistToggle?.(!currentState);
+    try {
+      const nextState = !isIn(propertyId);
+      toggle(propertyId);
+      if (onWishlistToggle) onWishlistToggle(nextState);
+    } catch {
+      alert("Error updating wishlist");
+    }
+  };
+
+  // 🔥 FLICKER-FREE IMAGE HANDLING
+  const safeImages = getSafeImages(property?.images);
+  const [currentImg, setCurrentImg] = useState(safeImages[0] || fallbackImg);
+
+  const handleImageError = () => {
+    setCurrentImg(fallbackImg); // Only updates once — no flicker
   };
 
   const propertyId = getPropertyId();
-  const safeImages = getSafeImages(property?.images);
-
   const wishlisted = propertyId ? isIn(propertyId) : false;
+
+  const bedrooms = formatNumber(property?.bedrooms);
+  const bathrooms = formatNumber(property?.bathrooms);
+  const area = formatNumber(property?.area);
 
   return (
     <div className="property-card" onClick={handleViewDetailsClick}>
       <div className="property-card__media-container">
-        <div className="property-card__badge">
-          {property?.propertyType || "Property"}
-        </div>
+        <div className="property-card__badge">{property?.propertyType || "Property"}</div>
 
         <WishlistButton
           onClick={handleWishlistClick}
           size="small"
+          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          title={
+            isGuest
+              ? "Login to add to wishlist"
+              : wishlisted
+              ? "Remove from wishlist"
+              : "Add to wishlist"
+          }
           isWishlisted={wishlisted && !isGuest}
+          disabled={!propertyId}
         >
-          {wishlisted && !isGuest ? <Favorite sx={{ color: "#d32f2f" }} /> : <FavoriteOutlined />}
+          {wishlisted && !isGuest ? (
+            <Favorite sx={{ color: "#d32f2f" }} />
+          ) : (
+            <FavoriteOutlined />
+          )}
         </WishlistButton>
 
-        {safeImages.length > 0 ? (
-          <div style={{ position: "relative", width: "100%" }}>
-            <img
-              className="property-card__image"
-              src={safeImages[0]}
-              alt={property?.title || "Property"}
-              onError={(e) => (e.currentTarget.src = fallbackImg)}
-            />
-            <img src={watermark} alt="Watermark" className="property-overlay" />
-          </div>
-        ) : (
-          <div style={{ position: "relative", width: "100%" }}>
-            <img className="property-card__image" src={fallbackImg} alt="Fallback" />
-            <img src={watermark} alt="Watermark" className="property-overlay" />
-          </div>
-        )}
+        {/* ⭐ NO MORE FLICKER — SINGLE IMAGE WITH FALLBACK */}
+        <div style={{ position: "relative", width: "100%" }}>
+          <img
+            className="property-card__image"
+            src={currentImg}
+            alt={property?.title || "Property"}
+            onError={handleImageError}
+          />
+
+          <img src={watermark} alt="Watermark" className="property-overlay" />
+        </div>
       </div>
 
       <div className="property-card__content">
-        <div className="property-card__pricing">
+        <div
+          className="property-card__pricing"
+          style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+        >
           <span className="property-card__price">{formatCurrency(property?.rent)}</span>
           <span className="property-card__status-all">{postType}</span>
         </div>
 
-        <h3 className="property-card__title">
+        <h3 title={property?.title} className="property-card__title">
           {capitalizeText(property?.title) || "Untitled Property"}
         </h3>
 
-        {/* ⭐ ONLY LOCATION IS HIDDEN — NOT AMENITIES */}
         <div
           className={`property-card__location ${isGuest ? "blur-text" : ""}`}
           title={getLocationString(property?.location)}
@@ -203,21 +242,18 @@ const PropertyCard = ({
           <span>{getLocationString(property?.location)}</span>
         </div>
 
-        {/* ⭐ Amenities contain NO BLUR now */}
         <div className="property-card__specs">
           <div className="property-card__spec">
             <img src={bed} alt="bedrooms" />
-            <span>{formatNumber(property?.bedrooms)}</span>
+            <span>{bedrooms}</span>
           </div>
-
           <div className="property-card__spec">
-            <img src={bath} alt="bathrooms" />
-            <span>{formatNumber(property?.bathrooms)}</span>
+            <img src={bath} alt="bathroom" />
+            <span>{bathrooms}</span>
           </div>
-
           <div className="property-card__spec">
             <img src={areaImg} alt="area" />
-            <span>{formatNumber(property?.area)}</span>
+            <span>{area}</span>
           </div>
         </div>
 
@@ -225,11 +261,16 @@ const PropertyCard = ({
           <button
             className={`property-card__action-btn ${
               isAuthenticated ? "authenticated" : "unauthenticated"
-            }`}
+            } rounded-2`}
             onClick={handleViewDetailsClick}
             type="button"
+            disabled={!propertyId}
           >
-            {isAuthenticated ? "View Details" : "Login to View Details"}
+            {!propertyId
+              ? "Property Unavailable"
+              : isAuthenticated
+              ? "View Details"
+              : "Login to View Details"}
           </button>
         </div>
       </div>
