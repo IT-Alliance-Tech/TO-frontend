@@ -27,9 +27,12 @@ export const API_CONFIG = {
     PROPERTIES: '/admin/properties',
     REVIEW_PROPERTY: '/admin/properties/:id/review',
     PUBLISH_PROPERTY: '/admin/properties/:id',
-    BOOKINGS: '/booking/all',
-    BOOKING_ANALYTICS: '/booking/analytics',
-    UPDATE_BOOKING: '/booking/:id/status'
+
+    // ✅ Correct booking endpoints
+    BOOKINGS: '/admin/bookings',                // GET all bookings
+    UPDATE_BOOKING_STATUS: '/admin/bookings/:id/status', // PATCH approve/reject
+    
+    BOOKING_ANALYTICS: '/booking/analytics', // (kept same as you added)
   },
 
   // User endpoints
@@ -45,14 +48,15 @@ export const API_CONFIG = {
   // Subscription APIs
   SUBSCRIPTION: {
     BASE: '/subscriptions',
-    CREATE_FOR_USER: '/user-subscriptions/subscribe'
+    CREATE_FOR_USER: '/user-subscriptions/subscribe',
+    USER_SUBSCRIPTIONS: '/user-subscriptions' // <-- Added this line
   },
 
-  // ✅ PHONEPE PAYMENT APIs (added newly)
+  // PhonePe Payment APIs
   PAYMENTS: {
-    INITIATE: '/payment/phonepe/initiate',      // Create transaction
-    CALLBACK: '/payment/phonepe/callback',      // PhonePe callback
-    STATUS: '/payment/phonepe/status'           // Check payment status
+    INITIATE: '/payment/phonepe/initiate',
+    CALLBACK: '/payment/phonepe/callback',
+    STATUS: '/payment/phonepe/status'
   }
 }
 
