@@ -439,7 +439,7 @@ const handleSearch = () => {
         <div className="container">
           {/* 🌟 Premium Subscription Banner */}
 <section
-  className="w-full text-center flex items-center justify-center py-20"
+  className=" premium-section w-full text-center flex items-center justify-center py-20"
   style={{
     background: "linear-gradient(180deg, #E1EDFF 0%, #FFFFFF 100%)",
     color: "#000",
