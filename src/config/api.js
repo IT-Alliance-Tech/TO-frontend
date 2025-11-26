@@ -1,6 +1,7 @@
 // API Configuration
 export const API_CONFIG = {
   BASE_URL: 'https://backend-to-1.onrender.com/api',
+    // BASE_URL: 'https://tru-backend-6v7c.onrender.com/api',
   
   // Auth endpoints
   AUTH: {
