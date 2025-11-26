@@ -20,7 +20,7 @@ import MyBookings from './components/pages/bookings/MyBookings'
 import PropertiesPage from './components/pages/Property/Properties'
 import SubscriptionPlans from './components/pages/other/SubscriptionPlans'
 import ScrollToTop from './components/common/ScrollToTop'
-
+import PostProperty from './components/pages/Admin/PostProperty';
 // ✅ Newly added imports
 import SuccessPage from './components/pages/subscription/SuccessPage'
 import ErrorPage from './components/pages/subscription/ErrorPage'
@@ -97,13 +97,17 @@ function App() {
               <Route path="/error" element={<LayoutWrapper><ErrorPage /></LayoutWrapper>} />
 
               <Route 
-                path="/system/admin/secure-access-2025" 
+                path="/system/admin/secure-access-portal-2025" 
                 element={<ErrorBoundary><SecretAdminAccess /></ErrorBoundary>} 
               />
               <Route 
                 path="/admin/dashboard" 
                 element={<ErrorBoundary><AdminDashboard /></ErrorBoundary>} 
               />
+              <Route 
+  path="/properties/post" 
+  element={<PostProperty />} 
+/>
 
               <Route path="*" element={<AppContent />} />
             </Routes>
