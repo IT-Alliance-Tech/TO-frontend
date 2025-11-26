@@ -20,6 +20,7 @@
     "compressorjs": "^1.2.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
+    "lucide-react": "^0.554.0",
     "razorpay": "^2.9.6",
     "react": "^19.1.0",
     "react-countup": "^6.5.3",
