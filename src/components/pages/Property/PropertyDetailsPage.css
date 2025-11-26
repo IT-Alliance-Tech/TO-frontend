@@ -959,3 +959,11 @@
     font-size: var(--font-size-base);
   }
 }
+
+
+.blur-text {
+  filter: blur(4px);
+  opacity: 0.6;
+  user-select: none;
+  pointer-events: none;
+}

@@ -451,6 +451,7 @@ const handleSearch = () => {
   <div className="max-w-3xl px-6">
     <h2 className="text-4xl md:text-5xl font-bold mb-3 text-[#1a2a6c]">
       Upgrade to TruOwners Premium
+      
     </h2>
 
     <p className="text-lg md:text-xl mb-8 text-[#333] opacity-80 leading-relaxed">

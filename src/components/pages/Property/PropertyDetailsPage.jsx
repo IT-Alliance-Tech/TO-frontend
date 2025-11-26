@@ -4,6 +4,7 @@ import { useAuth } from '../../../context/AuthContext'
 import { buildApiUrl, API_CONFIG } from '../../../config/api'
 import { handleApiError, getErrorMessage, validateApiResponse } from '../../../utils/errorHandler'
 import './PropertyDetailsPage.css'
+// import { useNavigate } from "react-router-dom";
 
 
 
@@ -86,6 +87,12 @@ const PropertyDetailsPage = () => {
   const [shareOpen, setShareOpen] = useState(false);
   const shareUrl = `https://truowners.com/property-details/${id}`;; // ✅ later replace with dynamic property link
 
+const [ownerDetails, setOwnerDetails] = useState(null);
+const [remainingViews, setRemainingViews] = useState(null);
+const [success, setSuccess] = useState("");
+const [showSubscribeModal, setShowSubscribeModal] = useState(false);
+
+
 const handleCopy = () => {
   navigator.clipboard.writeText(shareUrl);
   alert("Link copied!");
@@ -129,135 +136,119 @@ const handleCloseSnackbar = () => {
     }
   }, [id, isAuthenticated, user?.role, authLoading])
 
-  const fetchPropertyDetails = async () => {
-    setLoading(true)
-    setError('')
 
-    try {
-      // Validate session if user is authenticated
-      if (isAuthenticated && !(await validateSession())) {
-        setError('Session expired. Please login again.')
-        return
-      }
+const fetchPropertyDetails = async () => {
+  setLoading(true);
+  setError('');
 
-      const headers = {
-        'Content-Type': 'application/json'
-      }
-
-      // Add auth header if user is authenticated and token exists
-      if (isAuthenticated && token) {
-        headers['Authorization'] = `Bearer ${token}`
-      }
-
-      const response = await fetch(buildApiUrl(`${API_CONFIG.USER.PROPERTIES}/${id}`), {
-        method: 'GET',
-        headers
-      })
-
-      let data
-      try {
-        data = await response.json()
-        validateApiResponse(data)
-      } catch (parseError) {
-        throw new Error('Invalid response from server')
-      }
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          // Unauthorized - token might be expired
-          setError('Authentication expired. Please login again.')
-          // Don't auto-logout here as property might be viewable without auth
-          return
-        }
-        if (response.status === 404) {
-          throw new Error('Property not found')
-        }
-        throw new Error(data.error || handleApiError(null, response))
-      }
-
-      if (data.success) {
-        setProperty(data.data.property)
-        setSimilarProperties(data.data.similarProperties);
-        // Set booking info if available
-        if (data.data.bookingInfo) {
-          setBookingInfo(data.data.bookingInfo)
-        }
-      } else {
-        throw new Error(getErrorMessage(data))
-      }
-    } catch (err) {
-      console.error('Fetch property details error:', err)
-      setError(err.message || 'Failed to load property details. Please try again.')
-    } finally {
-      setLoading(false)
+  try {
+    if (isAuthenticated && !(await validateSession())) {
+      setError('Session expired. Please login again.');
+      return;
     }
-  }
 
-
-  const contactOwnerFn = async () => {
-    try {
-      // Validate session if user is authenticated
-      if (isAuthenticated && !(await validateSession())) {
-        setError('Session expired. Please login again.')
-        return
-      }
-
-      const headers = {
-        'Content-Type': 'application/json'
-      }
-
-      // Add auth header if user is authenticated and token exists
-      if (isAuthenticated && token) {
-        headers['Authorization'] = `Bearer ${token}`
-      }
-
-      const response = await fetch(buildApiUrl(`${API_CONFIG.USER.CONTACTOWNER}`), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          propertyId: id
-        })
-      })
-
-      let data
-      try {
-        data = await response.json()
-        validateApiResponse(data)
-      } catch (parseError) {
-        throw new Error('Invalid response from server')
-      }
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          // Unauthorized - token might be expired
-          setError('Authentication expired. Please login again.')
-          // Don't auto-logout here as property might be viewable without auth
-          return
-        }
-        if (response.status === 404) {
-          throw new Error('Property not found')
-        }
-        throw new Error(data.error || handleApiError(null, response))
-      }
-
-      if (data.success) {
-
-        console.log(data.data);
-
-        setUnlockContact(data.data)
-      } else {
-        throw new Error(getErrorMessage(data))
-      }
-    } catch (err) {
-      console.error('Fetch property details error:', err)
-      setError(err.message || 'Failed to load property details. Please try again.')
-    } finally {
-      setLoading(false)
+    const headers = { 'Content-Type': 'application/json' };
+    if (isAuthenticated && token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
+
+    const response = await fetch(
+      buildApiUrl(`${API_CONFIG.USER.PROPERTIES}/${id}`),
+      { method: 'GET', headers }
+    );
+
+    let data = await response.json();
+    console.log("Property API Response:", data);
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to load property.');
+    }
+
+    // ---- FIX START ----
+    let propertyData = null;
+
+    if (data?.data?.property) {
+      propertyData = data.data.property;
+    } else if (data?.data && !data.data.message) {
+      propertyData = data.data;
+    }
+
+    if (!propertyData) {
+      throw new Error("Property data missing in response.");
+    }
+    // ---- FIX END ----
+
+    setProperty(propertyData);
+    setSimilarProperties([]);
+   setBookingInfo({
+  userHasBooking: false,
+  bookedSlots: [],
+  userHasSubscription: false  // if needed
+});
+
+  } catch (err) {
+    console.error('Fetch property details error:', err);
+    setError(err.message || 'Failed to load property details.');
+  } finally {
+    setLoading(false);
   }
+};
+
+
+
+
+const contactOwnerFn = async () => {
+  try {
+    setError("");
+    setSuccess("");
+
+    // 1️⃣ Subscription check
+    if (!user?.subscription || user?.subscription?.status !== "active") {
+      navigate("/subscription-plans");
+      return;
+    }
+
+    // 2️⃣ Session check
+    if (isAuthenticated && !(await validateSession())) {
+      setError("Session expired. Please login again.");
+      return;
+    }
+
+    const headers = { "Content-Type": "application/json" };
+
+    if (isAuthenticated && token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    // 3️⃣ API Call
+    const response = await fetch(buildApiUrl(API_CONFIG.USER.UNLOCK_CONTACT), {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        userId: user?._id,
+        propertyId: id,
+      }),
+    });
+
+    const result = await response.json();
+
+    // 4️⃣ Success
+    if (result.success) {
+      setUnlockContact(result.data);
+      return;
+    }
+
+    // 5️⃣ Backend says subscription needed
+    if (result.statusCode === 403 && result?.data?.requiresSubscription) {
+      navigate("/subscription-plans");
+      return;
+    }
+
+    setError(result.error?.message || "Something went wrong");
+  } catch (err) {
+    setError("Unable to contact server.");
+  }
+};
 
 
 
@@ -796,7 +787,16 @@ const handleBookVisit = () => {
           <div className="property-header">
             <div className="property-title-section">
               <h1 className="property-title">{property.title || 'Untitled Property'}</h1>
-              <p className="property-location">📍 {getLocationString(property.location)}</p>
+              <p
+  className={`property-location ${
+    property?.subscription?.status === "active"
+      ? ""
+      : "blur-text"
+  }`}
+>
+  📍 {getLocationString(property.location)}
+</p>
+
               <div className="property-meta">
                 <span className="property-type">{property.propertyType || 'Property'}</span>
                 <span className="listed-date">Listed on {formatDate(property.createdAt)}</span>
@@ -1056,9 +1056,19 @@ const handleBookVisit = () => {
 
                 {isAuthenticated ? (
                   <>
-                    <button className="contact-btn" onClick={contactOwnerFn}>
-                      📞 Contact Owner
-                    </button>
+                    <button
+  onClick={() => {
+    if (!user?.subscription || user?.subscriptionStatus === "expired") {
+      navigate("/subscription-plans");
+      return;
+    }
+    contactOwnerFn();
+  }}
+  className="contact-btn"
+>
+  📞 Contact Owner
+</button>
+
 
                     {/* Book a Visit Button - Only show if user can make new booking */}
                     {/* {canMakeNewBooking() && (
@@ -1088,27 +1098,43 @@ const handleBookVisit = () => {
               </div>
 
               {/* Owner Info */}
-              {unlockContact &&
-                <div className="property-info-card">
-                  <h3>OWNER INFORMATION</h3>
-                  <div className="info-list">
-                    <div className="info-item" key={unlockContact?.property.id}>
-                      <span className="info-label">NAME: </span>
-                      <span className="info-value">
-                        {unlockContact?.ownerContact.name || 'N/A'}
+              {unlockContact && (
+  <div className="property-info-card">
+    <h3>OWNER INFORMATION</h3>
 
-                        {/* {property.id !== undefined && property.id !== null ? property.id : 'N/A'} */}
-                      </span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-label">EMAIL:</span>
-                      <span className="info-value">{unlockContact?.ownerContact.email || 'N/A'}</span>
-                    </div>
-                  </div>
-                </div>
-              }
+    <div className="info-list">
 
+      <div className="info-item">
+        <span className="info-label">NAME:</span>
+        <span className="info-value">
+          {unlockContact?.ownerContact?.name || "N/A"}
+        </span>
+      </div>
 
+      <div className="info-item">
+        <span className="info-label">EMAIL:</span>
+        <span className="info-value">
+          {unlockContact?.ownerContact?.email || "N/A"}
+        </span>
+      </div>
+
+      <div className="info-item">
+        <span className="info-label">PHONE:</span>
+        <span className="info-value">
+          {unlockContact?.ownerContact?.phone || "N/A"}
+        </span>
+      </div>
+
+      <div className="info-item">
+        <span className="info-label">Remaining Views:</span>
+        <span className="info-value">
+          {unlockContact?.subscription?.remainingViews}
+        </span>
+      </div>
+
+    </div>
+  </div>
+)}
 
               {/* Property Info */}
               <div className="property-info-card">
