@@ -30,9 +30,9 @@ export const API_CONFIG = {
 
     // ✅ Correct booking endpoints
     BOOKINGS: '/admin/bookings',                // GET all bookings
-    UPDATE_BOOKING_STATUS: '/admin/bookings/:id/status', // PATCH approve/reject
+    UPDATE_BOOKING_STATUS: '/booking/69243dab7b010ff976a94dc3/status',
+  
     
-    BOOKING_ANALYTICS: '/booking/analytics', // (kept same as you added)
   },
 
   // User endpoints
