@@ -1,67 +1,94 @@
-import React from "react";
+// src/components/pages/payment/PaymentPageUI.jsx
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./PaymentPage.css";
 
-const PaymentPage = () => {
-  const location = useLocation();
+const PaymentPage= () => {
+  const { state } = useLocation();
   const navigate = useNavigate();
+  const plan = state?.plan;
 
-  const plan = location.state?.plan;
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  if (!plan) {
-    return (
-      <div className="payment-container">
-        <h2>No Plan Selected</h2>
-        <button
-          className="payment-back-btn"
-          onClick={() => navigate("/subscription-plans")}
-        >
-          Go Back
-        </button>
-      </div>
-    );
-  }
+  const handlePayment = () => {
+    if (!paymentMethod) return alert("Please select a payment method");
+    setIsProcessing(true);
 
-  const handleProceedToPhonePe = () => {
-    // ⏳ Navigate to processing page
-    navigate("/processing");
-
-    // ⭐ Simulating backend response - replace with real API later
     setTimeout(() => {
-      const isSuccess = true; // change to false to test error page
-
-      if (isSuccess) {
-        navigate("/success");  // 🟢 Redirect to success page
-      } else {
-        navigate("/error");    // 🔴 Redirect to error page
-      }
+      setIsProcessing(false);
+      alert(`Payment successful for ${plan?.name}`);
+      navigate("/subscriptions");
     }, 2000);
   };
 
   return (
-    <div className="payment-container">
-      <div className="payment-card">
-        <h2 className="payment-heading">Payment Summary</h2>
+    <div className="payment-page-container">
+      <h2 className="payment-title">Payment for {plan?.name || "Subscription Plan"}</h2>
 
-        <div className="payment-plan-box">
-          <h3>{plan.name}</h3>
-          <p className="payment-price">{plan.price}</p>
-          <p className="payment-gst">{plan.gst}</p>
-          <p><strong>Validity:</strong> {plan.validity}</p>
-          <p><strong>Includes:</strong> {plan.includes}</p>
+      <div className="payment-summary-card">
+        <p><strong>Plan:</strong> {plan?.name}</p>
+        <p><strong>Price:</strong> {plan?.price}</p>
+        <p><strong>Includes:</strong> {plan?.includes}</p>
+        <p><strong>Validity:</strong> {plan?.validity}</p>
+      </div>
+
+      <div className="payment-methods-container">
+        <h3>Select Payment Method</h3>
+        <div className="payment-method-buttons">
+          <button
+            className={`payment-btn ${paymentMethod === "upi" ? "selected" : ""}`}
+            onClick={() => setPaymentMethod("upi")}
+          >
+            UPI / QR
+          </button>
+          <button
+            className={`payment-btn ${paymentMethod === "card" ? "selected" : ""}`}
+            onClick={() => setPaymentMethod("card")}
+          >
+            Card
+          </button>
+          <button
+            className={`payment-btn ${paymentMethod === "wallet" ? "selected" : ""}`}
+            onClick={() => setPaymentMethod("wallet")}
+          >
+            Wallet
+          </button>
         </div>
 
-        <button
-          className="payment-proceed-btn"
-          onClick={handleProceedToPhonePe}
-        >
-          Proceed to Pay
-        </button>
+        {paymentMethod === "upi" && (
+          <div className="upi-scanner">
+            <h4>Scan QR Code to Pay</h4>
+            <img
+              src="https://via.placeholder.com/220x220.png?text=QR+Code"
+              alt="UPI QR"
+            />
+            <p>Open your UPI app and scan this code to complete the payment.</p>
+          </div>
+        )}
 
-        <button className="payment-cancel-btn" onClick={() => navigate(-1)}>
-          Cancel
-        </button>
+        {paymentMethod === "card" && (
+          <div className="card-form">
+            <input type="text" placeholder="Card Number" />
+            <input type="text" placeholder="Expiry MM/YY" />
+            <input type="text" placeholder="CVV" />
+          </div>
+        )}
+
+        {paymentMethod === "wallet" && (
+          <div className="wallet-options">
+            <p>Select your wallet app to proceed with payment.</p>
+          </div>
+        )}
       </div>
+
+      <button
+        className="pay-now-btn"
+        disabled={!paymentMethod || isProcessing}
+        onClick={handlePayment}
+      >
+        {isProcessing ? "Processing..." : `Pay ${plan?.price || ""}`}
+      </button>
     </div>
   );
 };
