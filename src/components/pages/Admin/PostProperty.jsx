@@ -8,7 +8,6 @@ import { handleApiError, getErrorMessage, validateApiResponse } from '../../../u
 import Compressor from 'compressorjs';
 import './PostProperty.css';
 
-
 const PostProperty = ({ onSuccess }) => {
   const { token } = useAuth();
   const navigate = useNavigate();
@@ -231,9 +230,13 @@ const PostProperty = ({ onSuccess }) => {
           {/* Owner Info */}
           <div className="form-section">
             <h3 className="section-title">Owner Information</h3>
-            <input type="text" name="name" value={formData.owner.name} onChange={handleInputChange} placeholder="Owner Name" required />
-            <input type="email" name="email" value={formData.owner.email} onChange={handleInputChange} placeholder="Owner Email" required />
-            <input type="text" name="phone" value={formData.owner.phone} onChange={handleInputChange} placeholder="Owner Phone" required />
+
+            <div className="two-col">
+              <input type="text" name="name" value={formData.owner.name} onChange={handleInputChange} placeholder="Name" required />
+              <input type="email" name="email" value={formData.owner.email} onChange={handleInputChange} placeholder="Email" required />
+            </div>
+
+            <input type="text" name="phone" value={formData.owner.phone} onChange={handleInputChange} placeholder="Phone Number" required />
           </div>
 
           {/* Basic Info */}
@@ -243,53 +246,94 @@ const PostProperty = ({ onSuccess }) => {
             <textarea name="description" value={formData.description} onChange={handleInputChange} placeholder="Property Description" rows="4" required />
           </div>
 
-          {/* Location Info */}
+          {/* Location */}
           <div className="form-section">
             <h3 className="section-title">Location</h3>
-            <input type="text" name="address" value={formData.location.address} onChange={handleLocationChange} placeholder="Street Address" required />
-            <input type="text" name="city" value={formData.location.city} onChange={handleLocationChange} placeholder="City" required />
-            <input type="text" name="state" value={formData.location.state} onChange={handleLocationChange} placeholder="State" required />
-            <input type="text" name="country" value={formData.location.country} onChange={handleLocationChange} placeholder="Country" required />
+
+            <div className="two-col">
+              <input type="text" name="address" value={formData.location.address} onChange={handleLocationChange} placeholder="Street Address" required />
+              <input type="text" name="city" value={formData.location.city} onChange={handleLocationChange} placeholder="City" required />
+            </div>
+
+            <div className="two-col">
+              <input type="text" name="state" value={formData.location.state} onChange={handleLocationChange} placeholder="State" required />
+              <input type="text" name="country" value={formData.location.country} onChange={handleLocationChange} placeholder="Country" required />
+            </div>
+
             <input type="text" name="pincode" value={formData.location.pincode} onChange={handleLocationChange} placeholder="Pincode" required />
-            <input type="url" name="googleMapsLink" value={formData.location.googleMapsLink} onChange={handleGoogleMapsLinkPaste} placeholder="Google Maps Link (Optional)" />
-            <button type="button" onClick={openGoogleMaps}>Open in Maps</button>
+
+            <div className="maps-row">
+              <input type="url" name="googleMapsLink" value={formData.location.googleMapsLink} onChange={handleGoogleMapsLinkPaste} placeholder="Google Maps Link (Optional)" />
+              <button type="button" onClick={openGoogleMaps}>Open Maps</button>
+            </div>
           </div>
 
-          {/* Property Details */}
+          {/* Property Details (2 column layout) */}
           <div className="form-section">
             <h3 className="section-title">Property Details</h3>
-            <select name="propertyType" value={formData.propertyType} onChange={handleInputChange}>
-              <option value="apartment">Apartment</option>
-              <option value="house">House</option>
-              <option value="condo">Condo</option>
-              <option value="villa">Villa</option>
-            </select>
-            <input type="number" name="area" value={formData.area} onChange={handleInputChange} placeholder="Area (sq ft)" required />
-            <input type="number" name="bedrooms" value={formData.bedrooms} onChange={handleInputChange} placeholder="Bedrooms" required />
-            <input type="number" name="bathrooms" value={formData.bathrooms} onChange={handleInputChange} placeholder="Bathrooms" required />
-            <input type="number" name="rent" value={formData.rent} onChange={handleInputChange} placeholder="Monthly Rent" required />
-            <input type="number" name="deposit" value={formData.deposit} onChange={handleInputChange} placeholder="Security Deposit" required />
+
+            <div className="two-col">
+              {/* Left side */}
+              <div className="col">
+                <select name="propertyType" value={formData.propertyType} onChange={handleInputChange}>
+                  <option value="apartment">Apartment</option>
+                  <option value="house">House</option>
+                  <option value="condo">Condo</option>
+                  <option value="villa">Villa</option>
+                </select>
+
+                <input type="number" name="bedrooms" value={formData.bedrooms} onChange={handleInputChange} placeholder="Bedrooms" required />
+
+                <input type="number" name="bathrooms" value={formData.bathrooms} onChange={handleInputChange} placeholder="Bathrooms" required />
+              </div>
+
+              {/* Right side */}
+              <div className="col">
+                <input type="number" name="area" value={formData.area} onChange={handleInputChange} placeholder="Area (sq ft)" required />
+
+                <input type="number" name="rent" value={formData.rent} onChange={handleInputChange} placeholder="Monthly Rent" required />
+
+                <input type="number" name="deposit" value={formData.deposit} onChange={handleInputChange} placeholder="Security Deposit" required />
+              </div>
+            </div>
           </div>
 
-          {/* Amenities */}
+          {/* Amenities (2 rows × 8 items) */}
           <div className="form-section">
             <h3 className="section-title">Amenities</h3>
-            {amenitiesList.map(a => (
-              <label key={a}>
-                <input type="checkbox" checked={formData.amenities.includes(a)} onChange={() => handleAmenityToggle(a)} /> {a}
-              </label>
-            ))}
+
+            <div className="amenities-grid">
+              {amenitiesList.map(a => (
+                <label key={a} className="amenity-item">
+                  <input
+                    type="checkbox"
+                    checked={formData.amenities.includes(a)}
+                    onChange={() => handleAmenityToggle(a)}
+                  /> 
+                  {a}
+                </label>
+              ))}
+            </div>
           </div>
 
           {/* Media Upload */}
           <div className="form-section">
             <h3 className="section-title">Media Upload</h3>
-            <input type="file" multiple accept={[...allowedTypes.images, ...allowedTypes.videos].join(',')} onChange={handleMediaChange} />
+
+            <input
+              type="file"
+              multiple
+              accept={[...allowedTypes.images, ...allowedTypes.videos].join(',')}
+              onChange={handleMediaChange}
+            />
+
             {mediaPreviews.length > 0 && (
               <div className="media-previews">
                 {mediaPreviews.map(p => (
                   <div key={p.id}>
-                    {p.type === 'image' ? <img src={p.url} alt={p.name} /> : <video src={p.url} controls />}
+                    {p.type === 'image'
+                      ? <img src={p.url} alt={p.name} />
+                      : <video src={p.url} controls />}
                     <button type="button" onClick={() => removeMedia(p.id)}>×</button>
                   </div>
                 ))}
@@ -297,7 +341,9 @@ const PostProperty = ({ onSuccess }) => {
             )}
           </div>
 
-          <button type="submit">{uploadingMedia ? 'Uploading Media...' : loading ? 'Posting Property...' : 'Post Property'}</button>
+          <button type="submit">
+            {uploadingMedia ? 'Uploading Media...' : loading ? 'Posting Property...' : 'Post Property'}
+          </button>
         </form>
       </div>
     </div>
