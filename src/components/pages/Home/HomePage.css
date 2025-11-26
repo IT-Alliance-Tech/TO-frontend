@@ -1371,3 +1371,20 @@ flex-direction: row;
   }
 }
 
+
+/* MOBILE VIEW ONLY */
+@media (max-width: 576px) {
+  .home_filter_main_container {
+    width: 75% !important;     /* increase width */
+    margin: 0 auto !important; /* center it */
+    padding: 15px !important;  /* more space inside */
+  }
+
+  .home_filter_main_container .pb-2 {
+    padding-bottom: 20px !important; /* increase height */
+  }
+
+  .search-filter-container {
+    margin-top: 10px !important;
+  }
+}

@@ -212,7 +212,8 @@ export default function PropertyFilter({ initialFilters = {}, currentFilters = {
         }}
       >
         {/* LOOKING FOR */}
-        <Grid item xs={12} sm={6} md={6} lg={3}>
+        <Grid item xs={12} sm={6} md={6} lg={3} sx={{ display: { xs: "none", sm: "none", md: "block" } }}
+>
           <SectionLabel>
             <HomeIcon sx={{ fontSize: 16 }} />
             LOOKING FOR
