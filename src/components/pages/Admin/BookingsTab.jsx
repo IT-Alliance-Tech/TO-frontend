@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box, Typography, TextField, Paper, Chip, Button, CircularProgress, Alert,
@@ -33,12 +34,17 @@ const BookingsTab = () => {
 
   const [processing, setProcessing] = useState(false);
 
-  const shortId = (id) =>
-    typeof id === 'object' && id?._id
-      ? `${id._id.slice(0, 6)}…${id._id.slice(-3)}`
-      : typeof id === 'string'
-      ? `${id.slice(0, 6)}…${id.slice(-3)}`
-      : 'N/A';
+  // safe short id display
+  const shortId = (id) => {
+    if (!id) return 'N/A';
+    if (typeof id === 'object' && id?._id) {
+      return `${id._id.slice(0, 6)}…${id._id.slice(-3)}`;
+    }
+    if (typeof id === 'string') {
+      return `${id.slice(0, 6)}…${id.slice(-3)}`;
+    }
+    return 'N/A';
+  };
 
   const displayName = (obj, fallback = 'N/A') => {
     if (!obj) return fallback;
@@ -58,28 +64,40 @@ const BookingsTab = () => {
     }
   };
 
-  const statusColor = (s) =>
-    ({ pending: 'warning', approved: 'success', rejected: 'error', completed: 'info' }[s] || 'default');
+  // statusColor accepts any casing
+  const statusColor = (s) => {
+    const key = (s || '').toString().toLowerCase();
+    switch (key) {
+      case 'pending': return 'warning';
+      case 'approved': return 'success';
+      case 'rejected': return 'error';
+      case 'completed': return 'info';
+      default: return 'default';
+    }
+  };
 
   const fetchBookings = async () => {
     try {
       setRefreshing(true);
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken') || '';
       const res = await fetch(buildApiUrl(API_CONFIG.ADMIN.BOOKINGS), {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const json = await res.json();
-      if (!json.success) throw new Error('Failed to fetch');
+      if (!res.ok || !json.success) {
+        throw new Error(json?.error?.message || json?.message || 'Failed to fetch');
+      }
 
-      setBookings(json.data.bookings || []);
+      setBookings(json.data?.bookings || []);
       setAnalytics({
-        totalBookings: json.data.totalBookings || 0,
-        totalByStatus: json.data.totalByStatus || {},
+        totalBookings: json.data?.totalBookings || 0,
+        totalByStatus: json.data?.totalByStatus || {},
       });
 
       setError(null);
-    } catch {
+    } catch (err) {
+      console.error('fetchBookings error:', err);
       setError('Failed to fetch bookings');
     } finally {
       setLoading(false);
@@ -89,6 +107,7 @@ const BookingsTab = () => {
 
   useEffect(() => {
     fetchBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(() => {
@@ -101,7 +120,7 @@ const BookingsTab = () => {
       );
     }
     if (filters.status !== 'all') {
-      list = list.filter((b) => b.status === filters.status);
+      list = list.filter((b) => (b.status || '').toString().toLowerCase() === filters.status.toLowerCase());
     }
     return list;
   }, [bookings, query, filters]);
@@ -111,45 +130,66 @@ const BookingsTab = () => {
     [filtered, page, rpp]
   );
 
-  // 🔥🔥 FIXED EXACTLY FOR YOUR API (NO STATUS IN URL)
-  const updateStatus = async (bookingId, status) => {
+  // Update booking status using PUT (send lowercase to match backend)
+  const updateStatus = async (bookingOrId, newStatus) => {
     try {
       setProcessing(true);
-      const token = localStorage.getItem('adminToken');
+
+      // derive bookingId safely
+      const bookingId = typeof bookingOrId === 'string'
+        ? bookingOrId
+        : bookingOrId && (bookingOrId._id || bookingOrId.id);
+
+      console.log('updateStatus called with:', bookingOrId);
+      console.log('derived bookingId:', bookingId);
+
+      if (!bookingId) {
+        setError('Invalid booking id');
+        setProcessing(false);
+        return;
+      }
+
+      const token = localStorage.getItem('adminToken') || '';
+
+      // backend expects lowercase values
+      const payloadStatus = (newStatus || '').toString().trim().toLowerCase();
 
       const finalUrl = buildApiUrl(
-        API_CONFIG.ADMIN.UPDATE_BOOKING_STATUS.replace(":bookingId", bookingId)
+        API_CONFIG.ADMIN.UPDATE_BOOKING_STATUS.replace(':id', encodeURIComponent(bookingId))
       );
 
       const res = await fetch(finalUrl, {
-        method: "PATCH",
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status: payloadStatus }),
       });
 
       const json = await res.json();
 
-      if (!json.success) throw new Error(json.message || "Update failed");
+      if (!res.ok || !json.success) {
+        throw new Error(json?.error?.message || json?.message || 'Update failed');
+      }
 
+      // refresh list & update selection
       await fetchBookings();
-      setDialogOpen(false);
+      setSelected(prev => (typeof prev === 'object' ? { ...prev, status: payloadStatus } : prev));
+      setError(null);
     } catch (err) {
-      console.error("Update error:", err);
-      setError("Failed to update booking");
+      console.error('Update error:', err);
+      setError(`Failed to update booking: ${err.message}`);
     } finally {
       setProcessing(false);
     }
   };
 
-  if (loading)
+  if (loading) {
     return (
       <Box display="flex" justifyContent="center" py={5}><CircularProgress /></Box>
     );
-
-  if (error) return <Alert severity="error">{error}</Alert>;
+  }
 
   return (
     <Box>
@@ -161,6 +201,8 @@ const BookingsTab = () => {
           </IconButton>
         </Tooltip>
       </Box>
+
+      {error && <Box mb={2}><Alert severity="error">{error}</Alert></Box>}
 
       <Grid container spacing={2} mb={3}>
         <Grid item xs={6} md={3}>
@@ -177,7 +219,7 @@ const BookingsTab = () => {
             <Card>
               <CardContent>
                 <Typography textTransform="capitalize">{s}</Typography>
-                <Typography variant="h4" color={`${statusColor(s)}.main`}>{c}</Typography>
+                <Typography variant="h4">{c}</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -217,7 +259,11 @@ const BookingsTab = () => {
                     <TableCell>{b.timeSlot || 'N/A'}</TableCell>
 
                     <TableCell>
-                      <Chip size="small" label={b.status} color={statusColor(b.status)} />
+                      <Chip
+                        size="small"
+                        label={((b.status || '') + '').toString()}
+                        color={statusColor(b.status)}
+                      />
                     </TableCell>
 
                     <TableCell>
@@ -251,40 +297,39 @@ const BookingsTab = () => {
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Booking Details</DialogTitle>
         <DialogContent dividers>
-          {selected && (
+          {selected ? (
             <>
               <Typography><strong>User:</strong> {displayName(selected.user)}</Typography>
               <Typography><strong>Property:</strong> {displayName(selected.property)}</Typography>
               <Typography><strong>Date:</strong> {safeDate(selected.date)}</Typography>
               <Typography><strong>Time Slot:</strong> {selected.timeSlot || 'N/A'}</Typography>
-              <Typography>
-                <strong>Status:</strong>
-                <Chip size="small" label={selected.status} color={statusColor(selected.status)} />
+              <Typography sx={{ mt: 1 }}>
+                <strong>Status:</strong>{' '}
+                <Chip size="small" label={((selected.status || '') + '')} color={statusColor(selected.status)} />
               </Typography>
             </>
+          ) : (
+            <Typography>No booking selected</Typography>
           )}
         </DialogContent>
 
         <DialogActions>
-          {selected?.status === 'pending' && (
-            <>
-              <Button
-                onClick={() => updateStatus(selected._id, 'rejected')}
-                color="error"
-                disabled={processing}
-              >
-                Reject
-              </Button>
-              <Button
-                onClick={() => updateStatus(selected._id, 'approved')}
-                color="success"
-                variant="contained"
-                disabled={processing}
-              >
-                Approve
-              </Button>
-            </>
-          )}
+          <Button
+            onClick={() => updateStatus(selected?._id || selected, 'approved')}
+            color="success"
+            variant="contained"
+            disabled={processing || (selected && ((selected.status || '').toString().toLowerCase() === 'approved'))}
+          >
+            Approve
+          </Button>
+          <Button
+            onClick={() => updateStatus(selected?._id || selected, 'rejected')}
+            color="error"
+            variant="contained"
+            disabled={processing || (selected && ((selected.status || '').toString().toLowerCase() === 'rejected'))}
+          >
+            Reject
+          </Button>
           <Button onClick={() => setDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
