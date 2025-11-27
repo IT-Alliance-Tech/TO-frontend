@@ -536,3 +536,22 @@
     margin-right: 20px !important; /* adjust this value if you want more right */
   }
 }
+/* Desktop only (Show buttons, hide hamburger) */
+@media (min-width: 950px) {
+  .nav-right {
+    display: flex !important;
+  }
+  .mobile-menu-icon {
+    display: none !important;
+  }
+}
+
+/* Mobile / Tablet (Show hamburger, hide buttons) */
+@media (max-width: 949px) {
+  .nav-right {
+    display: none !important;
+  }
+  .mobile-menu-icon {
+    display: flex !important;
+  }
+}
