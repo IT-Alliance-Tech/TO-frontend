@@ -206,7 +206,9 @@ const PostProperty = ({ onSuccess }) => {
       if (!response.ok) throw new Error(data.error || handleApiError(null, response));
       if (data.success) {
         if (onSuccess) onSuccess({ property: data.data });
-        navigate('/properties');
+
+        // ❌ Removed this redirect
+        // navigate('/properties');
       } else throw new Error(getErrorMessage(data));
     } catch (err) {
       setError(err.message || 'Failed to add property');
@@ -273,7 +275,6 @@ const PostProperty = ({ onSuccess }) => {
             <h3 className="section-title">Property Details</h3>
 
             <div className="two-col">
-              {/* Left side */}
               <div className="col">
                 <select name="propertyType" value={formData.propertyType} onChange={handleInputChange}>
                   <option value="apartment">Apartment</option>
@@ -287,7 +288,6 @@ const PostProperty = ({ onSuccess }) => {
                 <input type="number" name="bathrooms" value={formData.bathrooms} onChange={handleInputChange} placeholder="Bathrooms" required />
               </div>
 
-              {/* Right side */}
               <div className="col">
                 <input type="number" name="area" value={formData.area} onChange={handleInputChange} placeholder="Area (sq ft)" required />
 
@@ -298,7 +298,7 @@ const PostProperty = ({ onSuccess }) => {
             </div>
           </div>
 
-          {/* Amenities (2 rows × 8 items) */}
+          {/* Amenities */}
           <div className="form-section">
             <h3 className="section-title">Amenities</h3>
 
@@ -309,7 +309,7 @@ const PostProperty = ({ onSuccess }) => {
                     type="checkbox"
                     checked={formData.amenities.includes(a)}
                     onChange={() => handleAmenityToggle(a)}
-                  /> 
+                  />
                   {a}
                 </label>
               ))}
