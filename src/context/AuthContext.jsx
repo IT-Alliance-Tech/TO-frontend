@@ -70,29 +70,40 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false)
   }
 
-  // Login function
-  const login = (userData, authToken) => {
-    try {
-      // Validate inputs
-      if (!userData || !authToken) {
-        throw new Error('Invalid login data')
-      }
-
-      // Store in localStorage
-      localStorage.setItem('authToken', authToken)
-      localStorage.setItem('authUser', JSON.stringify(userData))
-      
-      // Update state
-      setUser(userData)
-      setToken(authToken)
-      setIsAuthenticated(true)
-      
-      console.log('Login successful, data stored')
-    } catch (error) {
-      console.error('Login error:', error)
-      throw error
+ // Login function
+const login = (userData, authToken) => {
+  try {
+    if (!userData || !authToken) {
+      throw new Error('Invalid login data')
     }
+
+    // Extract subscription details if available
+    const subscriptionStatus = userData.subscriptionStatus || null
+    const subscription = userData.subscription || null
+
+    // Merge subscription data into user
+    const finalUser = {
+      ...userData.user,   // actual user object (id, name, email)
+      subscriptionStatus,
+      subscription
+    }
+
+    // Store in localStorage
+    localStorage.setItem('authToken', authToken)
+    localStorage.setItem('authUser', JSON.stringify(finalUser))
+
+    // Update state
+    setUser(finalUser)
+    setToken(authToken)
+    setIsAuthenticated(true)
+
+    console.log('Login successful, user + subscription stored')
+  } catch (error) {
+    console.error('Login error:', error)
+    throw error
   }
+}
+
 
   // Logout function
   const logout = () => {
