@@ -1056,7 +1056,7 @@ const handleBookVisit = () => {
 
                 {isAuthenticated ? (
                   <>
-                    <button
+                    <button 
   onClick={() => {
     if (!user?.subscription || user?.subscriptionStatus === "expired") {
       navigate("/subscription-plans");
