@@ -810,7 +810,7 @@ const handlePostPropertySubmit = async () => {
                 <TableCell>Customer</TableCell>
                 <TableCell>Contact</TableCell>
                 <TableCell>Location</TableCell>
-                <TableCell>Details</TableCell>
+                <TableCell>Amenities</TableCell>
                 <TableCell>Rent</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Created</TableCell>

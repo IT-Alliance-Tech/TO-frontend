@@ -12,8 +12,6 @@ const SubscriptionPlans = () => {
   const [plansData, setPlansData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState(null);
-
-  // Checkbox state
   const [isChecked, setIsChecked] = useState(false);
 
   const navigate = useNavigate();
@@ -21,16 +19,12 @@ const SubscriptionPlans = () => {
 
   const fetchSubscriptionPlans = async () => {
     try {
-      const response = await fetch(
-        buildApiUrl(API_CONFIG.SUBSCRIPTION.BASE),
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await fetch(buildApiUrl(API_CONFIG.SUBSCRIPTION.BASE), {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (!response.ok) return setLoading(false);
-
       const data = await response.json();
 
       const plansArray =
@@ -62,12 +56,9 @@ const SubscriptionPlans = () => {
     fetchSubscriptionPlans();
   }, []);
 
-  // ⭐ NEW — After T&C accepted, navigate to payment page
   const goToPaymentPage = (plan) => {
     navigate("/payment", {
-      state: {
-        plan,
-      },
+      state: { plan },
     });
   };
 
@@ -80,7 +71,6 @@ const SubscriptionPlans = () => {
         return navigate("/login");
       }
 
-      // Skip backend subscription and go directly to payment page
       goToPaymentPage(plan);
     } catch (err) {
       console.error("Subscription Error:", err);
@@ -88,14 +78,55 @@ const SubscriptionPlans = () => {
     }
   };
 
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  // ✅ Option A: Use backend active subscription exactly as given
+  const activeSubscription =
+    user?.subscriptionStatus === "active" ? user.subscription : null;
+
+  const activePlanId = activeSubscription?.subscriptionId?._id;
+
   return (
     <section className="subscription-section">
+
+      {/* ✅ Active / No subscription / Not logged in UI */}
+      {user ? (
+        activeSubscription ? (
+          <div className="subscription-warning-banner success-banner">
+            <i>✔</i>
+            Active Subscription:{" "}
+            <strong>{activeSubscription.subscriptionId.name}</strong>
+            &nbsp;| Expires on {formatDate(activeSubscription.endDate)}
+            &nbsp;| Slots Left: {activeSubscription.available} /{" "}
+            {activeSubscription.subscriptionId.accessibleSlots}
+          </div>
+        ) : (
+          <div className="subscription-warning-banner">
+            <i>❗</i>
+            You do not have an active subscription. Choose a plan to access
+            property contact details.
+          </div>
+        )
+      ) : (
+        <div className="subscription-warning-banner login-banner">
+          <i>🔒</i> Please login to subscribe to a plan.
+        </div>
+      )}
+
       <div className="subscription-overview">
         <h2 className="subscription-section-title">Subscription Plans Overview</h2>
         <p className="subscription-section-description">
-          We offer three subscription plans to provide access to property contact information. Each plan includes a limited number of house contact details and has a validity period of 15 days
+          Choose from our plans to unlock property owner contact details.
         </p>
       </div>
+
+      {/* -------------------- PLANS -------------------- */}
 
       <div className="subscription-plans-container">
         {loading ? (
@@ -130,23 +161,32 @@ const SubscriptionPlans = () => {
                 ? themeColors.diamond
                 : {
                     text: "#1e3a8a",
-                    button: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+                    button: "#2563eb",
                     shadow: "0 10px 25px rgba(0,0,0,0.15)",
                   };
+
+            const isActivePlan = activePlanId === plan.id;
 
             return (
               <div
                 key={index}
                 className="subscription-plan-card"
-                style={{ boxShadow: theme.shadow }}
+                style={{
+                  boxShadow: theme.shadow,
+                  pointerEvents: isActivePlan ? "none" : "auto",
+                  cursor: isActivePlan ? "not-allowed" : "pointer",
+                }}
               >
                 <div className="subscription-plan-header">
-                  <h3 className="subscription-plan-name" style={{ color: theme.text }}>
-                    {plan.name}
+                  <h3
+                    className="subscription-plan-name"
+                    style={{ color: theme.text }}
+                  >
+                    {plan.name} {isActivePlan && "✔"}
                   </h3>
 
                   <p className="subscription-plan-price">
-                    {plan.price}
+                    {plan.price}{" "}
                     <span className="subscription-gst">{plan.gst}</span>
                   </p>
                 </div>
@@ -159,17 +199,42 @@ const SubscriptionPlans = () => {
                     <strong>Validity:</strong> {plan.validity}
                   </p>
 
-                  <button
-                    className="subscription-subscribe-button"
-                    style={{ background: theme.button, boxShadow: theme.shadow }}
-                    onClick={() => {
-                      setSelectedPlan(plan);
-                      setIsChecked(false);
-                      setShowModal(true);
-                    }}
-                  >
-                    Subscribe
-                  </button>
+                  {isActivePlan ? (
+                    <button className="active-subscribe-button" disabled>
+                      Active Plan ✓
+                    </button>
+                  ) : user && activeSubscription ? (
+                    <button
+                      className="subscription-subscribe-button"
+                      style={{ background: theme.button }}
+                      onClick={() => handleSubscribe(plan)}
+                    >
+                      Upgrade
+                    </button>
+                  ) : (
+                    <button
+                      className="subscription-subscribe-button"
+                      style={{ background: theme.button }}
+                      onClick={() => {
+                        // ✅ NEW FIX: Always open popup even if NOT logged in
+                        setSelectedPlan(plan);
+                        setIsChecked(false);
+                        setShowModal(true);
+                      }}
+                    >
+                      Subscribe
+                    </button>
+                  )}
+
+                  {isActivePlan && (
+                    <div className="plan-status-box">
+                      <p>✔ Expires: {formatDate(activeSubscription.endDate)}</p>
+                      <p>
+                        ✔ Slots Left: {activeSubscription.available} /{" "}
+                        {activeSubscription.subscriptionId.accessibleSlots}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -179,17 +244,29 @@ const SubscriptionPlans = () => {
         )}
       </div>
 
+      {/* -------------------- MODAL -------------------- */}
+
       {showModal && selectedPlan && (
         <div className="subscription-modal-overlay">
           <div className="subscription-modal-content">
-            <button className="subscription-modal-close" onClick={() => setShowModal(false)}>
+            <button
+              className="subscription-modal-close"
+              onClick={() => setShowModal(false)}
+            >
               ✕
             </button>
 
             <h2 className="modal-title">Terms & Conditions</h2>
 
             <div className="subscription-modal-summary">
-              <div style={{ marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <div
+                style={{
+                  marginBottom: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={isChecked}
@@ -202,7 +279,10 @@ const SubscriptionPlans = () => {
                 <Link
                   to={isChecked ? "/termcondition" : "#"}
                   className="subscription-detailed-tnc-link"
-                  style={{ pointerEvents: isChecked ? "auto" : "none", opacity: isChecked ? 1 : 0.5 }}
+                  style={{
+                    pointerEvents: isChecked ? "auto" : "none",
+                    opacity: isChecked ? 1 : 0.5,
+                  }}
                 >
                   View Full Terms & Conditions →
                 </Link>
@@ -212,7 +292,7 @@ const SubscriptionPlans = () => {
             <button
               className="subscription-modal-continue"
               disabled={!isChecked}
-              style={{ opacity: isChecked ? 1 : 0.5, cursor: isChecked ? "pointer" : "not-allowed" }}
+              style={{ opacity: isChecked ? 1 : 0.5 }}
               onClick={() => {
                 if (!isChecked) return;
                 setShowModal(false);

@@ -1,4 +1,4 @@
-// UsersTab.jsx  –  Enhanced
+// UsersTab.jsx – Enhanced with central alignment
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
@@ -151,12 +151,12 @@ const UsersTab = () => {
           <Table stickyHeader size="small">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ width: 80 }}>Avatar</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell sx={{ width: 120 }}>Role</TableCell>
-                <TableCell sx={{ width: 120 }}>Verified</TableCell>
-                <TableCell sx={{ width: 120 }}>Joined</TableCell>
+                <TableCell align="center" sx={{ width: 80 }}>Avatar</TableCell>
+                <TableCell align="center">Name</TableCell>
+                <TableCell align="center">Email</TableCell>
+                <TableCell align="center" sx={{ width: 120 }}>Role</TableCell>
+                <TableCell align="center" sx={{ width: 120 }}>Verified</TableCell>
+                <TableCell align="center" sx={{ width: 120 }}>Joined</TableCell>
               </TableRow>
             </TableHead>
 
@@ -169,7 +169,7 @@ const UsersTab = () => {
                       '&:last-of-type td': { border: 0 }
                     }}
                   >
-                    <TableCell>
+                    <TableCell align="center">
                       <Avatar
                         src={u.avatarUrl}
                         sx={{
@@ -183,17 +183,17 @@ const UsersTab = () => {
                       </Avatar>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell align="center">
                       <Typography fontWeight={600}>{u.name}</Typography>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell align="center">
                       <Typography variant="body2" color="text.secondary">
                         {u.email}
                       </Typography>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell align="center">
                       <Chip
                         size="small"
                         label={u.role}
@@ -207,8 +207,8 @@ const UsersTab = () => {
                       />
                     </TableCell>
 
-                    <TableCell>
-                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                    <TableCell align="center">
+                      <Stack direction="row" justifyContent="center" alignItems="center" spacing={0.5}>
                         {u.isVerified ? (
                           <>
                             <CheckCircle color="success" fontSize="small" />
@@ -227,7 +227,7 @@ const UsersTab = () => {
                       </Stack>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell align="center">
                       {new Date(u.createdAt).toLocaleDateString()}
                     </TableCell>
                   </TableRow>

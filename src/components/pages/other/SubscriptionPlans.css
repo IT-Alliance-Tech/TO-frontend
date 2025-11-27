@@ -1,3 +1,61 @@
+/* ==========================================================
+   ⚠ WARNING BANNER STYLES (NEW)
+   ========================================================== */
+.subscription-warning-banner {
+  max-width: 900px;
+  margin: 0 auto 25px auto;
+  padding: 14px 18px;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  background: #fff4e6;       /* light orange */
+  color: #b45309;            /* dark orange text */
+  border: 1px solid #fcd34d; /* yellow border */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  animation: subtleFadeIn 0.4s ease-in-out;
+}
+
+.subscription-warning-banner i {
+  font-style: normal;
+  font-size: 1.3rem;
+}
+
+@keyframes subtleFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================
+   DISABLED PLAN (NON-CLICKABLE — NEW)
+   ========================================================== */
+
+.subscription-plan-card.disabled {
+  opacity: 0.55;
+  cursor: not-allowed !important;
+  pointer-events: none; /* fully disables clicking */
+  border: 2px solid #9ca3af;
+  background: #e5e7eb;
+}
+
+.subscription-plan-card.disabled:hover {
+  transform: none;
+}
+
+.subscription-plan-card.disabled .subscription-subscribe-button {
+  background: #9ca3af !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+/* ==========================================================
+   EXISTING CSS BELOW (UNCHANGED)
+   ========================================================== */
+
 /* MAIN SECTION */
 .subscription-section {
   padding: 80px 20px;
@@ -68,7 +126,7 @@
 .subscription-subscribe-button {
   margin-top: 20px;
   width: auto;
-  padding: 12px 28px; /* horizontal padding increased */
+  padding: 12px 28px;
   border: none;
   color: white;
   font-weight: 600;
@@ -122,7 +180,6 @@
   color: #1d4ed8;
 }
 
-/* CONTENT */
 .subscription-modal-summary {
   color: #333;
   line-height: 1.6;
@@ -151,7 +208,6 @@
   background: #1d4ed8;
 }
 
-/* ANIMATION */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }

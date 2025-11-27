@@ -68,13 +68,20 @@ export default function SubscriptionTab() {
     </Box>
   );
 
+  const planLimits = {
+    Silver: 6,
+    Gold: 12,
+    Diamond: 25
+  };
+
   return (
     <Box>
-      {/* Header */}
+
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" sx={{ fontWeight:700 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700 }}>
           Subscription Plans
         </Typography>
+
         <Tooltip title="Refresh">
           <IconButton
             onClick={fetchSubscriptions}
@@ -89,9 +96,9 @@ export default function SubscriptionTab() {
         </Tooltip>
       </Box>
 
-      {/* Filters */}
-      <Paper sx={{ p:2, mb:3 }}>
-        <Stack direction={{ xs:'column', sm:'row' }} spacing={2} flexWrap="wrap" justifyContent="flex-start">
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
+
           <TextField
             label="Subscription ID"
             variant="outlined"
@@ -100,24 +107,27 @@ export default function SubscriptionTab() {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon color="action"/>
+                  <SearchIcon color="action" />
                 </InputAdornment>
               )
             }}
             sx={{ minWidth: 200, flex: 2 }}
           />
+
           <TextField select label="Status" value={status} onChange={e => setStatus(e.target.value)} sx={{ minWidth: 140, flex: 1.3 }}>
             <MenuItem value="">All</MenuItem>
             <MenuItem value="Active">Active</MenuItem>
             <MenuItem value="Inactive">Inactive</MenuItem>
             <MenuItem value="Pending">Pending</MenuItem>
           </TextField>
+
           <TextField select label="Plan Type" value={planType} onChange={e => setPlanType(e.target.value)} sx={{ minWidth: 140, flex: 1.3 }}>
             <MenuItem value="">All</MenuItem>
             <MenuItem value="Gold">Gold</MenuItem>
             <MenuItem value="Silver">Silver</MenuItem>
             <MenuItem value="Diamond">Diamond</MenuItem>
           </TextField>
+
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               label="Valid Till"
@@ -126,47 +136,105 @@ export default function SubscriptionTab() {
               renderInput={(params) => <TextField {...params} sx={{ minWidth: 140, flex: 1.5 }} />}
             />
           </LocalizationProvider>
+
         </Stack>
       </Paper>
 
-      {/* Table */}
-      <Paper elevation={0} sx={{
-        border: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
-        borderRadius:2,
-        overflow:'hidden'
+      <Paper elevation={1} sx={{
+        borderRadius: 2,
+        overflow: 'hidden',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
       }}>
-        <TableContainer sx={{ maxHeight:560 }}>
-          <Table stickyHeader size="medium">
+        <TableContainer sx={{ maxHeight: 560 }}>
+          <Table stickyHeader>
+
             <TableHead>
-              <TableRow>
-                {['Name','Subscription ID','Status','Plan Type','Created At','Expiry Date','Viewed Count','Viewed Properties'].map(header => (
+              <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
+                {[
+                  'Name',
+                  'Plan Type',
+                  'Created At',
+                  'Expiry Date',
+                  'Viewed Count',
+                  'Viewed Properties',
+                  'Remaining Count'
+                ].map(header => (
                   <TableCell
                     key={header}
-                    sx={{ fontWeight:600, px:2, py:1.5, minWidth:header==='Viewed Properties'?200:120 }}
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      py: 1.5,
+                      minWidth: header === 'Viewed Properties' ? 200 : 140,
+                      textAlign: 'center'
+                    }}
                   >
                     {header}
                   </TableCell>
                 ))}
               </TableRow>
             </TableHead>
+
             <TableBody>
-              {paginated.map(sub => (
-                <Fade in key={sub._id}>
-                  <TableRow hover sx={{ '&:last-of-type td': { border:0 } }}>
-                    <TableCell sx={{ px:2, py:1.5 }}>{sub.userId?.name || '-'}</TableCell>
-                    <TableCell sx={{ px:2, py:1.5 }}>{sub.subscriptionId?.name || '-'}</TableCell>
-                    <TableCell sx={{ px:2, py:1.5 }}>
-                      <Chip label={sub.active ? 'Active' : 'Inactive'} color={sub.active ? 'success' : 'error'} size="small"/>
-                    </TableCell>
-                    <TableCell sx={{ px:2, py:1.5 }}>{sub.subscriptionId?.name || '-'}</TableCell>
-                    <TableCell sx={{ px:2, py:1.5 }}>{sub.createdAt ? new Date(sub.createdAt).toLocaleDateString() : '-'}</TableCell>
-                    <TableCell sx={{ px:2, py:1.5 }}>{sub.endDate ? new Date(sub.endDate).toLocaleDateString() : '-'}</TableCell>
-                    <TableCell sx={{ px:2, py:1.5 }}>{Array.isArray(sub.viewedProperties) ? sub.viewedProperties.length : 0}</TableCell>
-                    <TableCell sx={{ px:2, py:1.5 }}>{Array.isArray(sub.viewedProperties) ? sub.viewedProperties.map(p => p.propertyId).join(', ') : '-'}</TableCell>
-                  </TableRow>
-                </Fade>
-              ))}
-              {paginated.length===0 && (
+              {paginated.map(sub => {
+                const planName = sub.subscriptionId?.name;
+                const viewed = Array.isArray(sub.viewedProperties)
+                  ? sub.viewedProperties.length
+                  : 0;
+
+                const totalLimit = planLimits[planName] ?? 0;
+                const remaining = totalLimit - viewed;
+
+                // ⭐ Show Property ID (or fallback to Property Name)
+                const viewedPropertyList = Array.isArray(sub.viewedProperties)
+                  ? sub.viewedProperties
+                      .map(p =>
+                        p?._id
+                          ? p._id
+                          : p?.propertyName
+                            ? p.propertyName
+                            : "-"
+                      )
+                      .join(', ')
+                  : "-";
+
+                return (
+                  <Fade in key={sub._id}>
+                    <TableRow hover sx={{ '&:last-of-type td': { border: 0 } }}>
+
+                      <TableCell align="center">{sub.userId?.name || '-'}</TableCell>
+                      <TableCell align="center">{planName || '-'}</TableCell>
+
+                      <TableCell align="center">
+                        {sub.createdAt ? new Date(sub.createdAt).toLocaleDateString() : '-'}
+                      </TableCell>
+
+                      <TableCell align="center">
+                        {sub.endDate ? new Date(sub.endDate).toLocaleDateString() : '-'}
+                      </TableCell>
+
+                      <TableCell align="center">
+                        <Chip label={viewed} color="primary" variant="outlined" size="small" />
+                      </TableCell>
+
+                      <TableCell align="center">
+                        {viewedPropertyList || "-"}
+                      </TableCell>
+
+                      <TableCell align="center">
+                        <Chip
+                          label={remaining >= 0 ? remaining : 0}
+                          color={remaining > 0 ? 'success' : 'error'}
+                          size="small"
+                        />
+                      </TableCell>
+
+                    </TableRow>
+                  </Fade>
+                );
+              })}
+
+              {paginated.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8}>
                     <Box display="flex" justifyContent="center" alignItems="center" py={6}>
@@ -176,18 +244,22 @@ export default function SubscriptionTab() {
                 </TableRow>
               )}
             </TableBody>
+
           </Table>
         </TableContainer>
 
         <TablePagination
-          rowsPerPageOptions={[5,10,25]}
+          rowsPerPageOptions={[5, 10, 25]}
           component="div"
           count={filtered.length}
           rowsPerPage={rowsPerPage}
           page={page}
-          onPageChange={(_,p)=>setPage(p)}
-          onRowsPerPageChange={e=>{ setRowsPerPage(parseInt(e.target.value,10)); setPage(0); }}
-          sx={{ px:2 }}
+          onPageChange={(_, p) => setPage(p)}
+          onRowsPerPageChange={e => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+          sx={{ px: 2 }}
         />
       </Paper>
     </Box>

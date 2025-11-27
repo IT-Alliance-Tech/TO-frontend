@@ -164,27 +164,32 @@ const fetchPropertyDetails = async () => {
       throw new Error(data.error || 'Failed to load property.');
     }
 
-    // ---- FIX START ----
-    let propertyData = null;
+    // ---------------------------------
+    //      FIX: CLEAN PROPERTY DATA
+    // ---------------------------------
 
-    if (data?.data?.property) {
-      propertyData = data.data.property;
-    } else if (data?.data && !data.data.message) {
-      propertyData = data.data;
-    }
+    let propertyData = data?.data?.property;
 
     if (!propertyData) {
       throw new Error("Property data missing in response.");
     }
-    // ---- FIX END ----
 
-    setProperty(propertyData);
+    // Merge meta fields to root level
+    const cleanProperty = {
+      ...propertyData,
+      ...(propertyData.meta || {})  
+    };
+
+    // ---------------------------------
+
+    setProperty(cleanProperty);
     setSimilarProperties([]);
-   setBookingInfo({
-  userHasBooking: false,
-  bookedSlots: [],
-  userHasSubscription: false  // if needed
-});
+
+    setBookingInfo({
+      userHasBooking: false,
+      bookedSlots: [],
+      userHasSubscription: false
+    });
 
   } catch (err) {
     console.error('Fetch property details error:', err);
@@ -199,55 +204,84 @@ const fetchPropertyDetails = async () => {
 
 const contactOwnerFn = async () => {
   try {
-    setError("");
-    setSuccess("");
-
-    // 1️⃣ Subscription check
-    if (!user?.subscription || user?.subscription?.status !== "active") {
-      navigate("/subscription-plans");
-      return;
-    }
-
-    // 2️⃣ Session check
-    if (isAuthenticated && !(await validateSession())) {
-      setError("Session expired. Please login again.");
-      return;
-    }
-
-    const headers = { "Content-Type": "application/json" };
-
-    if (isAuthenticated && token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    // 3️⃣ API Call
-    const response = await fetch(buildApiUrl(API_CONFIG.USER.UNLOCK_CONTACT), {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        userId: user?._id,
-        propertyId: id,
-      }),
-    });
+    const response = await fetch(
+      "https://backend-to-1.onrender.com/api/user/unlock-contact",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+          propertyId: property?.propertyId,
+        }),
+      }
+    );
 
     const result = await response.json();
 
-    // 4️⃣ Success
-    if (result.success) {
-      setUnlockContact(result.data);
+    if (!result.success) {
+      setError(result.error || "Failed to unlock contact");
       return;
     }
 
-    // 5️⃣ Backend says subscription needed
-    if (result.statusCode === 403 && result?.data?.requiresSubscription) {
-      navigate("/subscription-plans");
-      return;
-    }
+    const { ownerContact, subscription } = result.data;
 
-    setError(result.error?.message || "Something went wrong");
+    // Update UI
+    setUnlockContact({
+      ownerContact,
+      subscription,
+    });
   } catch (err) {
-    setError("Unable to contact server.");
+    console.error(err);
+    setError("Something went wrong");
   }
+};
+
+
+
+
+
+const handleContactClick = async () => {
+  // 1. User not logged in → open login modal
+  if (!user) {
+    setShowLoginModal(true);
+    return;
+  }
+
+  // values coming from PROPERTY DETAILS API
+  const subscription = property?.subscription;
+  const alreadyViewed = property?.alreadyViewedThisProperty;
+  const remainingViews = subscription?.remainingViews;
+  const status = subscription?.status; // active / expired
+
+  // 2. No plan OR plan expired → redirect to subscription page
+  if (!subscription || status !== "active") {
+    navigate("/subscription-plans");
+    return;
+  }
+
+  // 3. Already viewed this property → show owner's contact instantly
+  if (alreadyViewed) {
+    setUnlockContact({
+      ownerContact: property.owner,  // owner object already present
+      subscription: {
+        alreadyViewed: true,
+        remainingViews,
+      },
+    });
+    return;
+  }
+
+  // 4. No views left → redirect
+  if (remainingViews <= 0) {
+    navigate("/subscription-plans");
+    return;
+  }
+
+  // 5. Valid plan + views available → unlock via API
+  await contactOwnerFn();
 };
 
 
@@ -1056,18 +1090,13 @@ const handleBookVisit = () => {
 
                 {isAuthenticated ? (
                   <>
-                    <button
-  onClick={() => {
-    if (!user?.subscription || user?.subscriptionStatus === "expired") {
-      navigate("/subscription-plans");
-      return;
-    }
-    contactOwnerFn();
-  }}
+<button 
+  onClick={handleContactClick}
   className="contact-btn"
 >
   📞 Contact Owner
 </button>
+
 
 
                     {/* Book a Visit Button - Only show if user can make new booking */}
@@ -1098,43 +1127,35 @@ const handleBookVisit = () => {
               </div>
 
               {/* Owner Info */}
-              {unlockContact && (
+{unlockContact && (
   <div className="property-info-card">
     <h3>OWNER INFORMATION</h3>
 
-    <div className="info-list">
-
-      <div className="info-item">
-        <span className="info-label">NAME:</span>
-        <span className="info-value">
-          {unlockContact?.ownerContact?.name || "N/A"}
-        </span>
-      </div>
-
-      <div className="info-item">
-        <span className="info-label">EMAIL:</span>
-        <span className="info-value">
-          {unlockContact?.ownerContact?.email || "N/A"}
-        </span>
-      </div>
-
-      <div className="info-item">
-        <span className="info-label">PHONE:</span>
-        <span className="info-value">
-          {unlockContact?.ownerContact?.phone || "N/A"}
-        </span>
-      </div>
-
-      <div className="info-item">
-        <span className="info-label">Remaining Views:</span>
-        <span className="info-value">
-          {unlockContact?.subscription?.remainingViews}
-        </span>
-      </div>
-
+    <div className="info-item">
+      <span className="info-label">NAME:</span>
+      <span className="info-value">{unlockContact.ownerContact?.name}</span>
     </div>
+
+    <div className="info-item">
+      <span className="info-label">EMAIL:</span>
+      <span className="info-value">{unlockContact.ownerContact?.email}</span>
+    </div>
+
+    <div className="info-item">
+      <span className="info-label">PHONE:</span>
+      <span className="info-value">{unlockContact.ownerContact?.phone}</span> 
+    </div>
+
+    {/* <div className="info-item">
+      <span className="info-label">Remaining Views:</span>
+      <span className="info-value">
+        {unlockContact.subscription?.remainingViews}
+      </span>
+    </div> */}
   </div>
 )}
+
+
 
               {/* Property Info */}
               <div className="property-info-card">

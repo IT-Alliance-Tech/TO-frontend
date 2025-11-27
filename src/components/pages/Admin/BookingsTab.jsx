@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box, Typography, TextField, Paper, Chip, Button, CircularProgress, Alert,
@@ -242,9 +241,9 @@ const BookingsTab = () => {
               <TableRow>
                 <TableCell>Customer</TableCell>
                 <TableCell>Property</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Time Slot</TableCell>
-                <TableCell>Status</TableCell>
+                <TableCell align="center">Date</TableCell>
+                <TableCell align="center">Time Slot</TableCell>
+                <TableCell align="center">Status</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -255,17 +254,15 @@ const BookingsTab = () => {
                   <TableRow hover>
                     <TableCell>{displayName(b.user)}</TableCell>
                     <TableCell>{displayName(b.property)}</TableCell>
-                    <TableCell>{safeDate(b.date)}</TableCell>
-                    <TableCell>{b.timeSlot || 'N/A'}</TableCell>
-
-                    <TableCell>
+                    <TableCell align="center">{safeDate(b.date)}</TableCell>
+                    <TableCell align="center">{b.timeSlot || 'N/A'}</TableCell>
+                    <TableCell align="center">
                       <Chip
                         size="small"
                         label={((b.status || '') + '').toString()}
                         color={statusColor(b.status)}
                       />
                     </TableCell>
-
                     <TableCell>
                       <Button
                         size="small"
