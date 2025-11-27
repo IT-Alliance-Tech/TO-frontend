@@ -60,6 +60,8 @@ const handleSaveProfile = (updatedData) => {
 }
 
 const [showUserEditProfile, setShowUserEditProfile] = useState(false)
+const [subscription, setSubscription] = useState(null);
+const [subscriptionStatus, setSubscriptionStatus] = useState(null);
 
 
   
@@ -284,11 +286,23 @@ const [showUserEditProfile, setShowUserEditProfile] = useState(false)
   }, [isAuthenticated, user, token])
 
   // Track auth state changes
-  useEffect(() => {
-    console.log('🏠 Header: Auth state changed')
-    console.log('  - User:', user)
-    console.log('  - isAuthenticated:', isAuthenticated)
-  }, [user, isAuthenticated])
+useEffect(() => {
+  console.log('🏠 Header: Auth state changed', { user, isAuthenticated });
+
+  if (isAuthenticated && user) {
+    // Load subscription from localStorage if it exists
+    const storedSubscription = JSON.parse(localStorage.getItem('subscription'));
+    const storedSubscriptionStatus = localStorage.getItem('subscriptionStatus');
+    
+    setSubscription(storedSubscription);
+    setSubscriptionStatus(storedSubscriptionStatus);
+  } else {
+    // Clear subscription info on logout
+    setSubscription(null);
+    setSubscriptionStatus(null);
+  }
+}, [user, isAuthenticated]);
+
 
   const isOwner = user?.role === 'owner'
   const isUser = user?.role === 'user'
@@ -716,11 +730,32 @@ const [showUserEditProfile, setShowUserEditProfile] = useState(false)
   </>
 )}
 <MenuItem
-  onClick={() => { navigate('/subscription-plans'); handleUserMenuClose(); }}
+  onClick={() => {
+    if (subscriptionStatus === 'active') {
+      navigate('/subscription-plans');
+    } else {
+      alert('You do not have an active subscription.');
+    }
+    handleUserMenuClose();
+  }}
   sx={{ padding: '12px 20px', '&:hover': { backgroundColor: '#f5f5f5' } }}
 >
   <BusinessIcon sx={{ mr: 2, fontSize: 20, color: '#9c27b0' }} />
-  <Typography variant="body2">Subscription Plans</Typography>
+  <Box>
+    <Typography variant="body2">Subscription Plan</Typography>
+    {subscriptionStatus === 'active' && subscription ? (
+      <Typography variant="caption" color="textSecondary">
+        {subscription.subscriptionId.name} plan - {Math.max(
+          0,
+          Math.ceil((new Date(subscription.endDate) - new Date()) / (1000 * 60 * 60 * 24))
+        )} days remaining, {subscription.available}/{subscription.subscriptionId.accessibleSlots} slots left
+      </Typography>
+    ) : (
+      <Typography variant="caption" color="error">
+        No active subscription
+      </Typography>
+    )}
+  </Box>
 </MenuItem>
 
 
