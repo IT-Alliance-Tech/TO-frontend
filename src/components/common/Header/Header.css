@@ -356,10 +356,10 @@
     gap: var(--spacing-2);
   }
   
-  .nav-buttons .btn {
+  /* .nav-buttons .btn {
     padding: var(--spacing-2) var(--spacing-3);
     font-size: var(--font-size-xs);
-  }
+  } */
 }
 
 /* Authenticated Navigation Layout */
@@ -536,22 +536,28 @@
     margin-right: 20px !important; /* adjust this value if you want more right */
   }
 }
-/* Desktop only (Show buttons, hide hamburger) */
-@media (min-width: 950px) {
-  .nav-right {
-    display: flex !important;
-  }
-  .mobile-menu-icon {
-    display: none !important;
-  }
+/* Default: Desktop visible, Mobile hidden */
+.desktop-nav {
+  display: flex;
+}
+.mobile-menu-icon {
+  display: none;
 }
 
-/* Mobile / Tablet (Show hamburger, hide buttons) */
-@media (max-width: 949px) {
-  .nav-right {
+/* Below 900px — hide desktop, show mobile */
+@media (max-width: 900px) {
+  .desktop-nav {
     display: none !important;
   }
   .mobile-menu-icon {
-    display: flex !important;
+    display: block !important;
   }
+}
+/* Universal header button sizing */
+.header .btn {
+  padding: 8px 16px;     /* consistent padding */
+  font-size: 15px;       /* consistent text size */
+  border-radius: 8px;    /* consistent shape */
+  min-width: 110px;      /* optional: keeps uniform width */
+  height: 40px;          /* consistent height */
 }
