@@ -1143,7 +1143,7 @@ const handleBookVisit = () => {
 
     <div className="info-item">
       <span className="info-label">PHONE:</span>
-      <span className="info-value">{unlockContact.ownerContact?.phone}</span>
+      <span className="info-value">{unlockContact.ownerContact?.phone}</span> 
     </div>
 
     {/* <div className="info-item">
