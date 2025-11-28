@@ -419,7 +419,14 @@ const PropertiesPage = () => {
             item
             xs={12}
             lg={3}
-            sx={{ display: { xs: "none", lg: "block" } }}   // show only ≥1200px
+            sx={{
+  display: {
+    xs: "none",
+    lg: "block",
+    "@media (min-width:1200px) and (max-width:1275px)": { display: "none" }
+  }
+}}
+   // show only ≥1200px
           >
             <Paper
               elevation={3}
@@ -450,7 +457,13 @@ const PropertiesPage = () => {
           {/* Active Filters Display */}
           {/* Properties List */}
           <Grid item xs={12} md={6} sx={{
-            maxWidth: "70%",
+           maxWidth: {
+  xs: "100%",
+  md: "100%",
+  "@media (min-width:1200px) and (max-width:1275px)": "100%",
+  lg: "70%",
+},
+
             width: "100%",
             "@media (max-width:1275px)": {
               maxWidth: "100%",
@@ -600,42 +613,58 @@ const PropertiesPage = () => {
           top: 150,
           left: 15,
           zIndex: 2000,
-          display: { xs: 'flex', lg: 'none' },
+          display: {
+  xs: "flex",
+  lg: "none",
+  "@media (min-width:1200px) and (max-width:1275px)": {
+   display: "flex"
+}
+
+},
+
         }}
       >
 
-        <button
-          onClick={() => setMobileFilterOpen(true)}
-          style={{
-            width: "50px",
-            height: "50px",
-            borderRadius: "50%",
-            backgroundColor: "#1976d2",
-            border: "none",
-            color: "white",
-            fontSize: "22px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-          }}
+       <button
+  onClick={() => setMobileFilterOpen(true)}
+  style={{
+    width: "50px",
+    height: "50px",
+    borderRadius: "50%",
+    backgroundColor: "#1976d2",
+    border: "none",
+    color: "white",
+    fontSize: "22px",
+    display:
+      (!mobileFilterOpen && window.innerWidth <= 1275) ? "flex" : "none",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+    position: "fixed",
+    top: "150px",
+    left: "15px",
+    zIndex: 2000,
+  }}
+>
+  ☰
+</button>
 
-        >
-          ☰
-        </button>
       </Box>
 
       <Drawer
         anchor="left"
         open={mobileFilterOpen}
         onClose={() => setMobileFilterOpen(false)}
-        sx={{
-          display: { xs: 'block', lg: 'none' },
-          '& .MuiDrawer-paper': {
-            width: '80%',
-            maxWidth: '400px',
-          },
-        }}
+       sx={{
+  "@media (min-width:1276px)": {
+    display: "none",
+  },
+  "& .MuiDrawer-paper": {
+    width: "80%",
+    maxWidth: "400px",
+  },
+}}
+
         // ✅ This allows dropdowns to render in portals outside the drawer
         ModalProps={{
           keepMounted: true, // Better mobile performance
